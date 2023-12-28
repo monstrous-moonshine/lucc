@@ -1,22 +1,19 @@
 #include "scan.hpp"
 
 #define ARRAY_LEN(a) (sizeof a / sizeof a[0])
-#define TOK_CASE1(c, t, l) case c: return Token{t, l};
+#define TOK_CASE1(c, t, l) case c: return {t, l};
 #define TOK_CASE2(c, n, t1, l1, t2, l2) \
     case c:                             \
-        if (peek() == n) {              \
-            advance();                  \
+        if (match(n)) {                 \
             return {t1, l1};            \
         } else {                        \
             return {t2, l2};            \
         }
 #define TOK_CASE3(c, n1, t1, l1, n2, t2, l2, t3, l3) \
     case c:                                          \
-        if (peek() == n1) {                          \
-            advance();                               \
+        if (match(n1)) {                             \
             return {t1, l1};                         \
-        } else if (peek() == n2) {                   \
-            advance();                               \
+        } else if (match(n2)) {                      \
             return {t2, l2};                         \
         } else {                                     \
             return {t3, l3};                         \
@@ -34,6 +31,7 @@ struct {
     TokenType type;
 } keywords[] = {
     {"if", TOK_K_IF},
+    {"else", TOK_K_ELSE},
     {"switch", TOK_K_SWITCH},
     {"for", TOK_K_FOR},
     {"while", TOK_K_WHILE},
@@ -116,6 +114,11 @@ char Scanner::advance() {
     return c;
 }
 
-char Scanner::peek() {
-    return *end;
+// DO NOT match('\0')
+bool Scanner::match(char c) {
+    if (peek() == c) {
+        advance();
+        return true;
+    }
+    return false;
 }

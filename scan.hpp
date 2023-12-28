@@ -37,6 +37,7 @@ enum TokenType {
     TOK_ASSIGN,
     TOK_COMMA,
     TOK_K_IF,
+    TOK_K_ELSE,
     TOK_K_SWITCH,
     TOK_K_FOR,
     TOK_K_WHILE,
@@ -61,7 +62,8 @@ public:
 private:
     void skip_whitespace();
     char advance();
-    char peek();
+    char peek() { return *end; }
+    bool match(char c);
     Token tok_ident();
     Token tok_number();
     Token tok_string();

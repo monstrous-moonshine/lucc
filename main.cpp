@@ -38,7 +38,9 @@ int main(int argc, char *argv[]) {
         }
     }
 #endif
-    auto e = parser.parse(0);
-    e->print();
-    printf("\n");
+    auto e = parser.parse_stmt();
+    if (e) e->print();
+    else {
+        fprintf(stderr, "Parse error\n");
+    }
 }
