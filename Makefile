@@ -9,7 +9,7 @@ mycc: $(OBJS)
 
 build/%.o build/%.d: build
 build/%.o: %.cpp
-	$(CXX) -c -o $@ $^ $(CXXFLAGS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
 build:
 	mkdir -p $@
