@@ -68,12 +68,13 @@ public:
 class Parser {
 public:
     Parser(Scanner &scanner) : scanner(scanner) { advance(); }
-    std::unique_ptr<ExprAST> parse();
+    std::unique_ptr<ExprAST> parse(int prec);
 private:
     Scanner &scanner;
     Token prev;
 
     void advance() { prev = scanner.scan(); }
+    int get_precedence();
 
     std::unique_ptr<ExprAST> number();
     std::unique_ptr<ExprAST> grouping();
@@ -98,11 +99,11 @@ private:
     /* DECR      */ {NULL, NULL, 0},
     /* TILDE     */ {NULL, NULL, 0},
     /* BANG      */ {NULL, NULL, 0},
-    /* PLUS      */ {NULL, &Parser::binary, 0},
-    /* MINUS     */ {NULL, &Parser::binary, 0},
-    /* STAR      */ {NULL, &Parser::binary, 0},
-    /* SLASH     */ {NULL, &Parser::binary, 0},
-    /* MOD       */ {NULL, &Parser::binary, 0},
+    /* PLUS      */ {NULL, &Parser::binary, 1},
+    /* MINUS     */ {NULL, &Parser::binary, 1},
+    /* STAR      */ {NULL, &Parser::binary, 2},
+    /* SLASH     */ {NULL, &Parser::binary, 2},
+    /* MOD       */ {NULL, &Parser::binary, 2},
     /* LSHIFT    */ {NULL, NULL, 0},
     /* RSHIFT    */ {NULL, NULL, 0},
     /* EQ        */ {NULL, NULL, 0},

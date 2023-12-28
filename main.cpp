@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
         }
     }
 #endif
-    auto e = parser.parse();
+    auto e = parser.parse(0);
     e->print();
     printf("\n");
 }
