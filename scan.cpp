@@ -64,9 +64,9 @@ Token Scanner::scan() {
     TOK_CASE2('!', '=', TOK_NE, "!=", TOK_BANG, "!")
     TOK_CASE3('>', '=', TOK_GE, ">=", '>', TOK_RSHIFT, ">>", TOK_GT, ">")
     TOK_CASE3('<', '=', TOK_LE, "<=", '<', TOK_LSHIFT, "<<", TOK_LT, "<")
-    TOK_CASE2('&', '&', TOK_LOGICAL_AND, "&&", TOK_AMPERSAND, "&")
-    TOK_CASE2('|', '|', TOK_LOGICAL_OR, "||", TOK_PIPE, "|")
-    TOK_CASE1('^', TOK_CARET, "^")
+    TOK_CASE2('&', '&', TOK_AND_AND, "&&", TOK_AND, "&")
+    TOK_CASE2('|', '|', TOK_OR_OR, "||", TOK_OR, "|")
+    TOK_CASE1('^', TOK_XOR, "^")
     TOK_CASE1('?', TOK_QUERY, "?")
     TOK_CASE1(':', TOK_COLON, ":")
     TOK_CASE1(',', TOK_COMMA, ",")
@@ -93,7 +93,7 @@ Token Scanner::tok_ident() {
 Token Scanner::tok_number() {
     while (isdigit(peek()))
         advance();
-    return {TOK_NUMBER, std::string(beg, end)};
+    return {TOK_INT_CONST, std::string(beg, end)};
 }
 
 Token Scanner::tok_string() {
