@@ -4,7 +4,7 @@ SRCS = main.cpp parse.cpp scan.cpp
 OBJS = $(SRCS:%.cpp=build/%.o)
 DEPS = $(SRCS:%.cpp=build/%.d)
 
-mycc: $(OBJS)
+lucc: $(OBJS)
 	$(CXX) -o $@ $^
 
 build/%.o build/%.d: build
@@ -15,7 +15,7 @@ build:
 	mkdir -p $@
 
 clean:
-	$(RM) mycc $(OBJS) $(DEPS)
+	$(RM) lucc $(OBJS) $(DEPS)
 
 .PHONY: clean
 
