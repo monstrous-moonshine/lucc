@@ -1,6 +1,12 @@
+#include "expr.hpp"
+#include "stmt.hpp"
 #include "parse.hpp"
+#include <cstdio>
 #include <functional>
 #include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #define ARRAY_LEN(a) (sizeof a / sizeof a[0])
 #define consume(expected_type, msg) ({ \
@@ -57,13 +63,14 @@ retry:
 }
 
 std::unique_ptr<StmtAST> Parser::block_stmt() {
-    std::unique_ptr<std::vector<std::unique_ptr<StmtAST>>> stmts;
+    std::unique_ptr<std::vector<std::unique_ptr<StmtAST>>> stmts(
+            new std::vector<std::unique_ptr<StmtAST>>);
     while (prev.type != TOK_RBRACE) {
         auto stmt = parse_stmt();
         if (!stmt) return NULL;
         stmts->emplace_back(std::move(stmt));
     }
-    advance();  // TOK_RBRACE
+    advance();  // '}'
     return std::make_unique<BlockStmtAST>(std::move(stmts));
 }
 
@@ -76,6 +83,7 @@ std::unique_ptr<StmtAST> Parser::if_stmt() {
     if (!then_arm) return NULL;
     std::unique_ptr<StmtAST> else_arm(nullptr);
     if (prev.type == TOK_K_ELSE) {
+        advance();
         else_arm = parse_stmt();
         if (!else_arm) return NULL;
     }
@@ -111,6 +119,12 @@ std::unique_ptr<ExprAST> Parser::parse_expr(int prec) {
     return e;
 }
 
+std::unique_ptr<ExprAST> Parser::variable() {
+    auto name = prev.lexeme;
+    advance();
+    return std::make_unique<VarExprAST>(name);
+}
+
 std::unique_ptr<ExprAST> Parser::number() {
     double v = std::stod(prev.lexeme);
     advance();
@@ -118,20 +132,85 @@ std::unique_ptr<ExprAST> Parser::number() {
 }
 
 std::unique_ptr<ExprAST> Parser::grouping() {
-    advance();
+    advance();  // '('
     auto e = parse_expr(0);
     if (!e) return NULL;
     consume(TOK_RPAREN, "Expect ')'\n");
     return e;
 }
 
-std::unique_ptr<ExprAST> Parser::binary(std::unique_ptr<ExprAST> e) {
+std::unique_ptr<ExprAST> Parser::index(std::unique_ptr<ExprAST> e) {
+    advance();  // '['
+    auto i = parse_expr(0);
+    if (!i) return NULL;
+    consume(TOK_RBRACKET, "Expect ']'\n");
+    return std::make_unique<IndexExprAst>(std::move(e), std::move(i));
+}
+
+std::unique_ptr<ExprAST> Parser::call(std::unique_ptr<ExprAST> e) {
+    advance();  // '('
+    if (prev.type == TOK_RPAREN) {
+        advance();
+        return std::make_unique<CallExprAST>(std::move(e), nullptr);
+    }
+    std::unique_ptr<std::vector<std::unique_ptr<ExprAST>>> args(
+            new std::vector<std::unique_ptr<ExprAST>>);
+    auto a = parse_expr(1);  // PREC_COMMA
+    if (!a) return NULL;
+    args->emplace_back(std::move(a));
+    while (prev.type == TOK_COMMA) {
+        advance();
+        auto a = parse_expr(1);  // PREC_COMMA
+        if (!a) return NULL;
+        args->emplace_back(std::move(a));
+    }
+    consume(TOK_RPAREN, "Expect ')'\n");
+    return std::make_unique<CallExprAST>(std::move(e), std::move(args));
+}
+
+std::unique_ptr<ExprAST> Parser::unary() {
     Token token = prev;
-    int   prec = get_expr_precedence();
+    advance();
+    auto e = unary();
+    if (!e) return NULL;
+    return std::make_unique<UnaryExprAST>(token, std::move(e));
+}
+
+std::unique_ptr<ExprAST> Parser::binary(std::unique_ptr<ExprAST> e) {
+    /* NOTE:
+     * 1. Assignment is right associative.
+     * 2. LHS of assignment must be unary expression.
+     *
+     * We handle point 1 by passing in a lower minimum precedence for the RHS
+     * when parsing an assignment. This will ensure that an assignment operator
+     * to the right of the current one will be parsed as part of the RHS. We
+     * will check for point 2 in the semantic analysis phase.
+     */
+    Token token = prev;
+    int   prec = get_expr_precedence() - (prev.type == TOK_ASSIGN ? 1 : 0);
     advance();
     auto f = parse_expr(prec);
     if (!f) return NULL;
     return std::make_unique<BinaryExprAST>(token, std::move(e), std::move(f));
+}
+
+std::unique_ptr<ExprAST> Parser::ternary(std::unique_ptr<ExprAST> e) {
+    /* NOTE:
+     * 1. @then_arm of conditional is parsed as if parenthesized. Precedence
+     *    of '?' is not used.
+     * 2. @else_arm of conditional must be another conditional. Here, prece-
+     *    dence of '?' is used. Since the ternary operator is right-associa-
+     *    tive, we pass in 1 less than the precedence of '?' here.
+     */
+    advance();  // '?'
+    auto then_expr = parse_expr(0);
+    if (!then_expr) return NULL;
+    consume(TOK_COLON, "Expect ':'\n");
+    auto else_expr = parse_expr(2);
+    if (!else_expr) return NULL;
+    return std::make_unique<TernaryExprAST>(std::move(e),
+                                            std::move(then_expr),
+                                            std::move(else_expr));
 }
 
 const Parser::ExprRule *Parser::get_expr_rule(TokenType type) {

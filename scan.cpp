@@ -1,4 +1,5 @@
 #include "scan.hpp"
+#include <cctype>
 
 #define ARRAY_LEN(a) (sizeof a / sizeof a[0])
 #define TOK_CASE1(c, t, l) case c: return {t, l};
@@ -54,17 +55,17 @@ Token Scanner::scan() {
     TOK_CASE1(']', TOK_RBRACKET, "]")
     TOK_CASE2('+', '+', TOK_INCR, "++", TOK_PLUS, "+")
     TOK_CASE2('-', '-', TOK_DECR, "--", TOK_MINUS, "-")
+    TOK_CASE1('~', TOK_TILDE, "~")
     TOK_CASE1('*', TOK_STAR, "*")
     TOK_CASE1('/', TOK_SLASH, "/")
     TOK_CASE1('%', TOK_MOD, "%")
-    TOK_CASE1('~', TOK_TILDE, "~")
+    TOK_CASE3('<', '=', TOK_LE, "<=", '<', TOK_LSHIFT, "<<", TOK_LT, "<")
+    TOK_CASE3('>', '=', TOK_GE, ">=", '>', TOK_RSHIFT, ">>", TOK_GT, ">")
     TOK_CASE2('=', '=', TOK_EQ, "==", TOK_ASSIGN, "=")
     TOK_CASE2('!', '=', TOK_NE, "!=", TOK_BANG, "!")
-    TOK_CASE3('>', '=', TOK_GE, ">=", '>', TOK_RSHIFT, ">>", TOK_GT, ">")
-    TOK_CASE3('<', '=', TOK_LE, "<=", '<', TOK_LSHIFT, "<<", TOK_LT, "<")
     TOK_CASE2('&', '&', TOK_AND_AND, "&&", TOK_AND, "&")
-    TOK_CASE2('|', '|', TOK_OR_OR, "||", TOK_OR, "|")
     TOK_CASE1('^', TOK_XOR, "^")
+    TOK_CASE2('|', '|', TOK_OR_OR, "||", TOK_OR, "|")
     TOK_CASE1('?', TOK_QUERY, "?")
     TOK_CASE1(':', TOK_COLON, ":")
     TOK_CASE1(',', TOK_COMMA, ",")
