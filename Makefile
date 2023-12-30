@@ -7,15 +7,15 @@ DEPS = $(SRCS:%.cpp=build/%.d)
 lucc: $(OBJS)
 	$(CXX) -o $@ $^
 
-build/%.o build/%.d: build
 build/%.o: %.cpp
 	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
+$(OBJS): | build
 build:
 	mkdir -p $@
 
 clean:
-	$(RM) lucc $(OBJS) $(DEPS)
+	$(RM) -r lucc build
 
 .PHONY: clean
 
