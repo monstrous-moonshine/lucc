@@ -1,6 +1,7 @@
 #include "decl.hpp"
 #include "parse.hpp"
 #include "scan.hpp"
+#include "stmt.hpp"
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>

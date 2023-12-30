@@ -12,7 +12,7 @@ class DirectDecl;
 class Parser {
 public:
     Parser(Scanner &scanner) : scanner(scanner) { advance(); }
-    std::unique_ptr<DeclAST> parse_decl() { return parse_decl(false); }
+    std::unique_ptr<DeclAST> parse_decl();
 private:
     Scanner &scanner;
     Token prev;

@@ -18,6 +18,10 @@
     advance();                         \
 })
 
+std::unique_ptr<DeclAST> Parser::parse_decl() {
+    return parse_decl(false);
+}
+
 std::unique_ptr<DeclAST> Parser::parse_decl(bool is_param) {
     Token type;
     switch (prev.type) {
