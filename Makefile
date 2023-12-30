@@ -1,4 +1,4 @@
-CXXFLAGS = -g -MMD
+CXXFLAGS = -Wall -Wextra -g -MMD
 
 SRCS = main.cpp parse.cpp scan.cpp
 OBJS = $(SRCS:%.cpp=build/%.o)
