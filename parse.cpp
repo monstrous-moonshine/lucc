@@ -1,3 +1,4 @@
+#include "decl.hpp"
 #include "expr.hpp"
 #include "stmt.hpp"
 #include "parse.hpp"
@@ -17,6 +18,103 @@
     advance();                         \
 })
 
+std::unique_ptr<DeclAST> Parser::parse_decl(bool is_param) {
+    Token type;
+    switch (prev.type) {
+    case TOK_T_VOID:
+    case TOK_T_CHAR:
+    case TOK_T_SHORT:
+    case TOK_T_INT:
+    case TOK_T_LONG:
+    case TOK_T_FLOAT:
+    case TOK_T_DOUBLE:
+    case TOK_T_SIGNED:
+    case TOK_T_UNSIGNED:
+        type = prev;
+        advance();
+        break;
+    default:
+        fprintf(stderr, "Expect type specifier\n");
+        return NULL;
+    }
+    auto decl = parse_declarator();
+    if (!decl) return NULL;
+    if (is_param) return std::make_unique<DeclAST>(
+            true, type, std::move(decl), nullptr);
+    if (prev.type == TOK_SEMICOLON) {
+        advance();
+        return std::make_unique<DeclAST>(false, type, std::move(decl), nullptr);
+    } else if (prev.type == TOK_LBRACE) {
+        advance();
+        auto body = block_stmt();
+        if (!body) return NULL;
+        return std::make_unique<DeclAST>(false, type,
+                                         std::move(decl),
+                                         std::move(body));
+    } else {
+        fprintf(stderr, "Expect ';' or '{'\n");
+        return NULL;
+    }
+}
+
+std::unique_ptr<Decl> Parser::parse_declarator() {
+    int ptr_level = 0;
+    while (prev.type == TOK_STAR) {
+        advance();
+        ptr_level++;
+    }
+    auto decl = parse_direct_declarator();
+    if (!decl) return NULL;
+    return std::make_unique<Decl>(ptr_level, std::move(decl));
+}
+
+std::unique_ptr<DirectDecl> Parser::parse_direct_declarator() {
+    std::unique_ptr<DirectDecl> decl;
+    if (prev.type == TOK_IDENT) {
+        decl = std::make_unique<VarDecl>(std::move(prev.lexeme));
+        advance();
+    } else if (prev.type == TOK_LPAREN) {
+        advance();
+        decl = parse_declarator();
+        consume(TOK_RPAREN, "Expect ')'\n");
+    } else {
+        fprintf(stderr, "Expect identifier or '('\n");
+        return NULL;
+    }
+    if (prev.type == TOK_LBRACKET) {
+        advance();
+        if (prev.type == TOK_RBRACKET) {
+            advance();
+            return std::make_unique<ArrayDecl>(std::move(decl), nullptr);
+        } else {
+            auto e = parse_expr(2);
+            consume(TOK_RBRACKET, "Expect ']'\n");
+            return std::make_unique<ArrayDecl>(std::move(decl), std::move(e));
+        }
+    } else if (prev.type == TOK_LPAREN) {
+        advance();
+        if (prev.type == TOK_RPAREN) {
+            advance();
+            return std::make_unique<FuncDecl>(std::move(decl), nullptr);
+        } else {
+            std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> params(
+                    new std::vector<std::unique_ptr<DeclAST>>);
+            auto param_decl = parse_decl(true);
+            if (!param_decl) return NULL;
+            params->emplace_back(std::move(param_decl));
+            while (prev.type == TOK_COMMA) {
+                advance();
+                auto param_decl = parse_decl(true);
+                if (!param_decl) return NULL;
+                params->emplace_back(std::move(param_decl));
+            }
+            consume(TOK_RPAREN, "Expect ')'\n");
+            return std::make_unique<FuncDecl>(std::move(decl), std::move(params));
+        }
+    } else {
+        return decl;
+    }
+}
 
 std::unique_ptr<StmtAST> Parser::parse_stmt() {
 retry:
@@ -122,7 +220,7 @@ std::unique_ptr<ExprAST> Parser::parse_expr(int prec) {
 std::unique_ptr<ExprAST> Parser::variable() {
     auto name = prev.lexeme;
     advance();
-    return std::make_unique<VarExprAST>(name);
+    return std::make_unique<VarExprAST>(std::move(name));
 }
 
 std::unique_ptr<ExprAST> Parser::number() {
@@ -171,7 +269,7 @@ std::unique_ptr<ExprAST> Parser::call(std::unique_ptr<ExprAST> e) {
 std::unique_ptr<ExprAST> Parser::unary() {
     Token token = prev;
     advance();
-    auto e = unary();
+    auto e = parse_expr(13);
     if (!e) return NULL;
     return std::make_unique<UnaryExprAST>(token, std::move(e));
 }

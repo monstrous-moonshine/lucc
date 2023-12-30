@@ -38,6 +38,15 @@ struct {
     {"while", TOK_K_WHILE},
     {"do", TOK_K_DO},
     {"return", TOK_K_RETURN},
+    {"void", TOK_T_VOID},
+    {"char", TOK_T_CHAR},
+    {"short", TOK_T_SHORT},
+    {"int", TOK_T_INT},
+    {"long", TOK_T_LONG},
+    {"float", TOK_T_FLOAT},
+    {"double", TOK_T_DOUBLE},
+    {"signed", TOK_T_SIGNED},
+    {"unsigned", TOK_T_UNSIGNED},
 };
 
 }  // namespace

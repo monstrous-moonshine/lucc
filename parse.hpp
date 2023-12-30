@@ -5,17 +5,25 @@
 #include <memory>
 class ExprAST;
 class StmtAST;
+class DeclAST;
+class Decl;
+class DirectDecl;
 
 class Parser {
 public:
     Parser(Scanner &scanner) : scanner(scanner) { advance(); }
-    std::unique_ptr<StmtAST> parse_stmt();
+    std::unique_ptr<DeclAST> parse_decl() { return parse_decl(false); }
 private:
     Scanner &scanner;
     Token prev;
 
-    std::unique_ptr<ExprAST> parse_expr(int prec);
     void advance() { prev = scanner.scan(); }
+
+    std::unique_ptr<DeclAST> parse_decl(bool is_param);
+    std::unique_ptr<Decl> parse_declarator();
+    std::unique_ptr<DirectDecl> parse_direct_declarator();
+    std::unique_ptr<StmtAST> parse_stmt();
+    std::unique_ptr<ExprAST> parse_expr(int prec);
 
     std::unique_ptr<ExprAST> variable();
     std::unique_ptr<ExprAST> number();

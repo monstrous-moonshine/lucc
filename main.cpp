@@ -1,6 +1,6 @@
+#include "decl.hpp"
 #include "parse.hpp"
 #include "scan.hpp"
-#include "stmt.hpp"
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -44,8 +44,8 @@ int main(int argc, char *argv[]) {
         }
     }
 #endif
-    auto e = parser.parse_stmt();
-    if (e) e->print(0);
+    auto decl = parser.parse_decl();
+    if (decl) decl->print(0);
     else {
         fprintf(stderr, "Parse error\n");
     }

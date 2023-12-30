@@ -3,6 +3,7 @@
 #include "scan.hpp"
 #include <cstdio>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -15,7 +16,7 @@ public:
 class VarExprAST : public ExprAST {
     std::string name;
 public:
-    VarExprAST(std::string name) : name(name) {}
+    VarExprAST(std::string &&name) : name(name) {}
     void print() override {
         printf("%s", &name[0]);
     }
@@ -37,7 +38,13 @@ public:
     IndexExprAst(std::unique_ptr<ExprAST> base,
                  std::unique_ptr<ExprAST> index)
         : base(std::move(base)), index(std::move(index)) {}
-    void print() override {}
+    void print() override {
+        printf("([] ");
+        base->print();
+        printf(" ");
+        index->print();
+        printf(")");
+    }
 };
 
 class CallExprAST : public ExprAST {
@@ -47,7 +54,17 @@ public:
     CallExprAST(std::unique_ptr<ExprAST> func,
                 std::unique_ptr<std::vector<std::unique_ptr<ExprAST>>> args)
         : func(std::move(func)), args(std::move(args)) {}
-    void print() override {}
+    void print() override {
+        printf("(");
+        func->print();
+        if (args) {
+            for (auto &e: *args) {
+                printf(" ");
+                e->print();
+            }
+        }
+        printf(")");
+    }
 };
 
 class UnaryExprAST : public ExprAST {
@@ -56,7 +73,11 @@ class UnaryExprAST : public ExprAST {
 public:
     UnaryExprAST(Token token, std::unique_ptr<ExprAST> exp)
         : token(token), exp(std::move(exp)) {}
-    void print() override {}
+    void print() override {
+        printf("(%s ", &token.lexeme[0]);
+        exp->print();
+        printf(")");
+    }
 };
 
 class BinaryExprAST : public ExprAST {
