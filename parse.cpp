@@ -140,8 +140,10 @@ retry:
         advance();
         return while_stmt();
     case TOK_K_DO:
-    case TOK_K_RETURN:
         return NULL;
+    case TOK_K_RETURN:
+        advance();
+        return return_stmt();
     case TOK_LBRACE:
         advance();
         return block_stmt();
@@ -198,6 +200,16 @@ std::unique_ptr<StmtAST> Parser::while_stmt() {
     auto body = parse_stmt();
     if (!body) return NULL;
     return std::make_unique<WhileStmtAST>(std::move(cond), std::move(body));
+}
+
+std::unique_ptr<StmtAST> Parser::return_stmt() {
+    if (prev.type == TOK_SEMICOLON) {
+        advance();
+        return std::make_unique<ReturnStmtAST>(nullptr);
+    }
+    auto e = parse_expr(0);
+    consume(TOK_SEMICOLON, "Expect ';'\n");
+    return std::make_unique<ReturnStmtAST>(std::move(e));
 }
 
 std::unique_ptr<ExprAST> Parser::parse_expr(int prec) {

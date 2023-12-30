@@ -37,6 +37,7 @@ private:
     std::unique_ptr<StmtAST> block_stmt();
     std::unique_ptr<StmtAST> if_stmt();
     std::unique_ptr<StmtAST> while_stmt();
+    std::unique_ptr<StmtAST> return_stmt();
 
     using Prefix = std::unique_ptr<ExprAST> (Parser::*)();
     using Infix  = std::unique_ptr<ExprAST> (Parser::*)(
