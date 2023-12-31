@@ -19,7 +19,7 @@ private:
 
     void advance() { prev = scanner.scan(); }
 
-    std::unique_ptr<DeclAST> parse_decl(bool is_param);
+    std::unique_ptr<DeclAST> parse_decl(bool is_param, bool can_fail);
     std::unique_ptr<Decl> parse_declarator();
     std::unique_ptr<DirectDecl> parse_direct_declarator();
     std::unique_ptr<StmtAST> parse_stmt();

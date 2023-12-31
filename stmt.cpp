@@ -19,6 +19,9 @@ void ExprStmtAST::print(int level) {
 void BlockStmtAST::print(int level) {
     blank(level);
     printf("{\n");
+    for (auto &decl: *decls) {
+        decl->print(level + 2);
+    }
     for (auto &stmt: *stmts) {
         stmt->print(level + 2);
     }

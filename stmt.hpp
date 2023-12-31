@@ -1,5 +1,6 @@
 #ifndef STMT_HPP
 #define STMT_HPP
+#include "decl.hpp"
 #include "expr.hpp"
 #include <memory>
 #include <utility>
@@ -19,10 +20,12 @@ public:
 };
 
 class BlockStmtAST : public StmtAST {
+    std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> decls;
     std::unique_ptr<std::vector<std::unique_ptr<StmtAST>>> stmts;
 public:
-    BlockStmtAST(std::unique_ptr<std::vector<std::unique_ptr<StmtAST>>> stmts)
-        : stmts(std::move(stmts)) {}
+    BlockStmtAST(std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> decls,
+                 std::unique_ptr<std::vector<std::unique_ptr<StmtAST>>> stmts)
+        : decls(std::move(decls)), stmts(std::move(stmts)) {}
     void print(int level) override;
 };
 

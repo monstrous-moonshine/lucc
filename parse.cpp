@@ -19,10 +19,10 @@
 })
 
 std::unique_ptr<DeclAST> Parser::parse_decl() {
-    return parse_decl(false);
+    return parse_decl(false, false);
 }
 
-std::unique_ptr<DeclAST> Parser::parse_decl(bool is_param) {
+std::unique_ptr<DeclAST> Parser::parse_decl(bool is_param, bool can_fail) {
     Token type;
     switch (prev.type) {
     case TOK_T_VOID:
@@ -38,7 +38,8 @@ std::unique_ptr<DeclAST> Parser::parse_decl(bool is_param) {
         advance();
         break;
     default:
-        fprintf(stderr, "Expect type specifier\n");
+        if (!can_fail)
+            fprintf(stderr, "Expect type specifier\n");
         return NULL;
     }
     auto decl = parse_declarator();
@@ -103,12 +104,12 @@ std::unique_ptr<DirectDecl> Parser::parse_direct_declarator() {
         } else {
             std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> params(
                     new std::vector<std::unique_ptr<DeclAST>>);
-            auto param_decl = parse_decl(true);
+            auto param_decl = parse_decl(true, false);
             if (!param_decl) return NULL;
             params->emplace_back(std::move(param_decl));
             while (prev.type == TOK_COMMA) {
                 advance();
-                auto param_decl = parse_decl(true);
+                auto param_decl = parse_decl(true, false);
                 if (!param_decl) return NULL;
                 params->emplace_back(std::move(param_decl));
             }
@@ -167,15 +168,27 @@ retry:
 }
 
 std::unique_ptr<StmtAST> Parser::block_stmt() {
+    std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> decls(
+            new std::vector<std::unique_ptr<DeclAST>>);
     std::unique_ptr<std::vector<std::unique_ptr<StmtAST>>> stmts(
             new std::vector<std::unique_ptr<StmtAST>>);
+    if (prev.type == TOK_RBRACE) {
+        advance();
+        return std::make_unique<BlockStmtAST>(std::move(decls),
+                                              std::move(stmts));
+    }
+    while (prev.type != TOK_RBRACE) {
+        auto decl = parse_decl(false, true);
+        if (!decl) break;
+        decls->emplace_back(std::move(decl));
+    }
     while (prev.type != TOK_RBRACE) {
         auto stmt = parse_stmt();
         if (!stmt) return NULL;
         stmts->emplace_back(std::move(stmt));
     }
     advance();  // '}'
-    return std::make_unique<BlockStmtAST>(std::move(stmts));
+    return std::make_unique<BlockStmtAST>(std::move(decls), std::move(stmts));
 }
 
 std::unique_ptr<StmtAST> Parser::if_stmt() {
