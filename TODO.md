@@ -20,6 +20,5 @@ Unimplemented syntax:
     2. Compound assignment operators
     3. Cast expression
     4. `sizeof` operator
-    5. Unary operators: `&`, `*`
-    6. Postfix operators: `.`, `->`, `++`, `--`
-    7. Constants: `char`, `float`, `enum`
+    5. Postfix operators: `.`, `->`
+    6. Constants: `char`, `float`, `enum`
