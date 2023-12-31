@@ -1,6 +1,6 @@
 CXXFLAGS = -Wall -Wextra -g -MMD
 
-SRCS = decl.cpp main.cpp parse.cpp scan.cpp stmt.cpp
+SRCS = decl.cpp expr.cpp main.cpp parse.cpp scan.cpp stmt.cpp
 OBJS = $(SRCS:%.cpp=build/%.o)
 DEPS = $(SRCS:%.cpp=build/%.d)
 
