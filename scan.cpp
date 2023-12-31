@@ -1,23 +1,25 @@
 #include "scan.hpp"
 #include <cctype>
+#include <unordered_map>
 
 #define ARRAY_LEN(a) (sizeof a / sizeof a[0])
-#define TOK_CASE1(c, t, l) case c: return {t, l};
-#define TOK_CASE2(c, n, t1, l1, t2, l2) \
-    case c:                             \
-        if (match(n)) {                 \
-            return {t1, l1};            \
-        } else {                        \
-            return {t2, l2};            \
+#define CUR_LEX std::string(beg, end)
+#define TOK_CASE1(c, t) case c: return {t, CUR_LEX};
+#define TOK_CASE2(c, t, n1, t1)   \
+    case c:                       \
+        if (match(n1)) {          \
+            return {t1, CUR_LEX}; \
+        } else {                  \
+            return {t, CUR_LEX};  \
         }
-#define TOK_CASE3(c, n1, t1, l1, n2, t2, l2, t3, l3) \
-    case c:                                          \
-        if (match(n1)) {                             \
-            return {t1, l1};                         \
-        } else if (match(n2)) {                      \
-            return {t2, l2};                         \
-        } else {                                     \
-            return {t3, l3};                         \
+#define TOK_CASE3(c, t, n1, t1, n2, t2) \
+    case c:                             \
+        if (match(n1)) {                \
+            return {t1, CUR_LEX};       \
+        } else if (match(n2)) {         \
+            return {t2, CUR_LEX};       \
+        } else {                        \
+            return {t, CUR_LEX};        \
         }
 
 namespace
@@ -27,10 +29,7 @@ inline bool isalpha_(char c) {
     return isalpha(c) || c == '_';
 }
 
-struct {
-    std::string lexeme;
-    TokenType type;
-} keywords[] = {
+const std::unordered_map<std::string, TokenType> keywords = {
     {"if", TOK_K_IF},
     {"else", TOK_K_ELSE},
     {"switch", TOK_K_SWITCH},
@@ -58,32 +57,31 @@ Token Scanner::scan() {
     else if (isdigit(c)) return tok_number();
     switch (c) {
     case '"': return tok_string();
-    TOK_CASE1('(', TOK_LPAREN, "(")
-    TOK_CASE1(')', TOK_RPAREN, ")")
-    TOK_CASE1('[', TOK_LBRACKET, "[")
-    TOK_CASE1(']', TOK_RBRACKET, "]")
-    TOK_CASE2('+', '+', TOK_INCR, "++", TOK_PLUS, "+")
-    TOK_CASE2('-', '-', TOK_DECR, "--", TOK_MINUS, "-")
-    TOK_CASE1('~', TOK_TILDE, "~")
-    TOK_CASE1('*', TOK_STAR, "*")
-    TOK_CASE1('/', TOK_SLASH, "/")
-    TOK_CASE1('%', TOK_MOD, "%")
-    TOK_CASE3('<', '=', TOK_LE, "<=", '<', TOK_LSHIFT, "<<", TOK_LT, "<")
-    TOK_CASE3('>', '=', TOK_GE, ">=", '>', TOK_RSHIFT, ">>", TOK_GT, ">")
-    TOK_CASE2('=', '=', TOK_EQ, "==", TOK_ASSIGN, "=")
-    TOK_CASE2('!', '=', TOK_NE, "!=", TOK_BANG, "!")
-    TOK_CASE2('&', '&', TOK_AND_AND, "&&", TOK_AND, "&")
-    TOK_CASE1('^', TOK_XOR, "^")
-    TOK_CASE2('|', '|', TOK_OR_OR, "||", TOK_OR, "|")
-    TOK_CASE1('?', TOK_QUERY, "?")
-    TOK_CASE1(':', TOK_COLON, ":")
-    TOK_CASE1(',', TOK_COMMA, ",")
-    TOK_CASE1('{', TOK_LBRACE, "{")
-    TOK_CASE1('}', TOK_RBRACE, "}")
-    TOK_CASE1(';', TOK_SEMICOLON, ";")
-    TOK_CASE1('\0', TOK_EOF, "")
-    default:
-        return {TOK_ERR, ""};
+    TOK_CASE1('(', TOK_LPAREN)
+    TOK_CASE1(')', TOK_RPAREN)
+    TOK_CASE1('[', TOK_LBRACKET)
+    TOK_CASE1(']', TOK_RBRACKET)
+    TOK_CASE1('~', TOK_TILDE)
+    TOK_CASE1('*', TOK_STAR)
+    TOK_CASE1('/', TOK_SLASH)
+    TOK_CASE1('%', TOK_MOD)
+    TOK_CASE2('+', TOK_PLUS,  '+', TOK_INCR)
+    TOK_CASE2('-', TOK_MINUS, '-', TOK_DECR)
+    TOK_CASE3('<', TOK_LT, '=', TOK_LE, '<', TOK_LSHIFT)
+    TOK_CASE3('>', TOK_GT, '=', TOK_GE, '>', TOK_RSHIFT)
+    TOK_CASE1('^', TOK_XOR)
+    TOK_CASE2('&', TOK_AND, '&', TOK_AND_AND)
+    TOK_CASE2('|', TOK_OR,  '|', TOK_OR_OR)
+    TOK_CASE1('?', TOK_QUERY)
+    TOK_CASE1(':', TOK_COLON)
+    TOK_CASE2('!', TOK_BANG,   '=', TOK_NE)
+    TOK_CASE2('=', TOK_ASSIGN, '=', TOK_EQ)
+    TOK_CASE1(',', TOK_COMMA)
+    TOK_CASE1('{', TOK_LBRACE)
+    TOK_CASE1('}', TOK_RBRACE)
+    TOK_CASE1(';', TOK_SEMICOLON)
+    case '\0': return {TOK_EOF, "?EOF"};
+    default: return {TOK_ERR, CUR_LEX};
     }
 }
 
@@ -91,11 +89,11 @@ Token Scanner::tok_ident() {
     while (isalpha_(peek()) || isdigit(peek()))
         advance();
     const auto lexeme = std::string(beg, end);
-    for (unsigned i = 0; i < ARRAY_LEN(keywords); i++) {
-        if (lexeme == keywords[i].lexeme)
-            return {keywords[i].type, lexeme};
-    }
-    return {TOK_IDENT, lexeme};
+    auto it = keywords.find(lexeme);
+    if (it == keywords.end())
+        return {TOK_IDENT, lexeme};
+    else
+        return {it->second, lexeme};
 }
 
 Token Scanner::tok_number() {
@@ -107,7 +105,7 @@ Token Scanner::tok_number() {
 Token Scanner::tok_string() {
     while (peek() != '\0' && peek() != '"')
         advance();
-    if (peek() == '\0') return {TOK_ERR, ""};
+    if (peek() == '\0') return {TOK_ERR, "?UNTERMINATED_STRING"};
     advance();
     return {TOK_STRING, std::string(beg + 1, end - 1)};
 }
