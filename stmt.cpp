@@ -62,6 +62,15 @@ void WhileStmtAST::print(int level) {
     body->print(level + 2);
 }
 
+void DoStmtAST::print(int level) {
+    blank(level);
+    printf("do\n");
+    body->print(level + 2);
+    printf("while (");
+    cond->print();
+    printf(")\n");
+}
+
 void ReturnStmtAST::print(int level) {
     blank(level);
     printf("return");

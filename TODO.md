@@ -13,8 +13,7 @@ Unimplemented syntax:
 - Statements
     1. Labeled statement: label, `case`, `default`
     2. Selection statement: `switch`
-    3. Iteration statement: `do`
-    4. Jump statement: `goto`, `continue`, `break`
+    3. Jump statement: `goto`, `continue`, `break`
 - Expression
     1. Comma operator
     2. Compound assignment operators

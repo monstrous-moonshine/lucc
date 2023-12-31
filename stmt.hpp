@@ -68,6 +68,16 @@ public:
     void print(int level) override;
 };
 
+class DoStmtAST : public StmtAST {
+    std::unique_ptr<ExprAST> cond;
+    std::unique_ptr<StmtAST> body;
+public:
+    DoStmtAST(std::unique_ptr<ExprAST> cond,
+              std::unique_ptr<StmtAST> body)
+        : cond(std::move(cond)), body(std::move(body)) {}
+    void print(int level) override;
+};
+
 class ReturnStmtAST : public StmtAST {
     std::unique_ptr<ExprAST> e;
 public:

@@ -164,7 +164,8 @@ retry:
         advance();
         return while_stmt();
     case TOK_K_DO:
-        return NULL;
+        advance();
+        return do_stmt();
     case TOK_K_RETURN:
         advance();
         return return_stmt();
@@ -262,6 +263,18 @@ std::unique_ptr<StmtAST> Parser::while_stmt() {
     auto body = parse_stmt();
     if (!body) return NULL;
     return std::make_unique<WhileStmtAST>(std::move(cond), std::move(body));
+}
+
+std::unique_ptr<StmtAST> Parser::do_stmt() {
+    auto body = parse_stmt();
+    if (!body) return NULL;
+    consume(TOK_K_WHILE, "Expect 'while'\n");
+    consume(TOK_LPAREN, "Expect '('\n");
+    auto cond = parse_expr(0);
+    if (!cond) return NULL;
+    consume(TOK_RPAREN, "Expect ')'\n");
+    consume(TOK_SEMICOLON, "Expect ';'\n");
+    return std::make_unique<DoStmtAST>(std::move(cond), std::move(body));
 }
 
 std::unique_ptr<StmtAST> Parser::return_stmt() {
