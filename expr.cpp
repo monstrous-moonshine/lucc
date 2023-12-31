@@ -56,3 +56,9 @@ void TernaryExprAST::print() {
     else_expr->print();
     printf(")");
 }
+
+void PostfixExprAST::print() {
+    printf("(|%s ", &token.lexeme[0]);
+    exp->print();
+    printf(")");
+}

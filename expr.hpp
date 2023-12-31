@@ -82,4 +82,13 @@ public:
         , else_expr(std::move(else_expr)) {}
     void print() override;
 };
+
+class PostfixExprAST : public ExprAST {
+    Token token;
+    std::unique_ptr<ExprAST> exp;
+public:
+    PostfixExprAST(Token token, std::unique_ptr<ExprAST> exp)
+        : token(token), exp(std::move(exp)) {}
+    void print() override;
+};
 #endif

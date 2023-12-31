@@ -389,6 +389,12 @@ std::unique_ptr<ExprAST> Parser::ternary(std::unique_ptr<ExprAST> e) {
                                             std::move(else_expr));
 }
 
+std::unique_ptr<ExprAST> Parser::postfix(std::unique_ptr<ExprAST> e) {
+    Token token = prev;
+    advance();
+    return std::make_unique<PostfixExprAST>(token, std::move(e));
+}
+
 const Parser::ExprRule *Parser::get_expr_rule(TokenType type) {
     return type < ARRAY_LEN(expr_rules) ? &expr_rules[type] : NULL;
 }

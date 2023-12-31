@@ -44,6 +44,7 @@ private:
     std::unique_ptr<ExprAST> unary();
     std::unique_ptr<ExprAST> binary(std::unique_ptr<ExprAST>);
     std::unique_ptr<ExprAST> ternary(std::unique_ptr<ExprAST>);
+    std::unique_ptr<ExprAST> postfix(std::unique_ptr<ExprAST>);
 
     std::unique_ptr<StmtAST> block_stmt();
     std::unique_ptr<StmtAST> if_stmt();
@@ -72,11 +73,11 @@ private:
     /* RPAREN    */ {NULL, NULL, 0},
     /* LBRACKET  */ {NULL, &Parser::index, 14},
     /* RBRACKET  */ {NULL, NULL, 0},
-    /* INCR      */ {&Parser::unary, NULL, 0},
-    /* DECR      */ {&Parser::unary, NULL, 0},
+    /* INCR      */ {&Parser::unary, &Parser::postfix, 14},
+    /* DECR      */ {&Parser::unary, &Parser::postfix, 14},
     /* TILDE     */ {&Parser::unary, NULL, 0},
     /* BANG      */ {&Parser::unary, NULL, 0},
-    /* STAR      */ {NULL, &Parser::binary, 13},
+    /* STAR      */ {&Parser::unary, &Parser::binary, 13},
     /* SLASH     */ {NULL, &Parser::binary, 13},
     /* MOD       */ {NULL, &Parser::binary, 13},
     /* PLUS      */ {&Parser::unary, &Parser::binary, 12},
@@ -89,7 +90,7 @@ private:
     /* GE        */ {NULL, &Parser::binary, 10},
     /* EQ        */ {NULL, &Parser::binary, 9},
     /* NE        */ {NULL, &Parser::binary, 9},
-    /* AND       */ {NULL, &Parser::binary, 8},
+    /* AND       */ {&Parser::unary, &Parser::binary, 8},
     /* XOR       */ {NULL, &Parser::binary, 7},
     /* OR        */ {NULL, &Parser::binary, 6},
     /* AND_AND   */ {NULL, &Parser::binary, 5},
