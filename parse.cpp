@@ -38,6 +38,18 @@ Token Parser::parse_type_spec() {
     }
 }
 
+std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>>
+Parser::parse_trans_unit() {
+    std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> decls(
+            new std::vector<std::unique_ptr<DeclAST>>);
+    while (prev.type != TOK_EOF) {
+        auto decl = parse_external_decl();
+        if (!decl) return NULL;
+        decls->emplace_back(std::move(decl));
+    }
+    return decls;
+}
+
 std::unique_ptr<DeclAST> Parser::parse_external_decl() {
     Token type = parse_type_spec();
     if (type.type == TOK_ERR) {

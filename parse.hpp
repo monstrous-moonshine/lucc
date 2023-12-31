@@ -3,6 +3,7 @@
 #include "scan.hpp"
 #include <cstddef>
 #include <memory>
+#include <vector>
 class ExprAST;
 class StmtAST;
 class DeclAST;
@@ -12,7 +13,7 @@ class DirectDecl;
 class Parser {
 public:
     Parser(Scanner &scanner) : scanner(scanner) { advance(); }
-    std::unique_ptr<DeclAST> parse_external_decl();
+    std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> parse_trans_unit();
 private:
     Scanner &scanner;
     Token prev;
@@ -27,6 +28,7 @@ private:
     }
 
     Token parse_type_spec();
+    std::unique_ptr<DeclAST> parse_external_decl();
     std::unique_ptr<DeclAST> parse_param_decl();
     std::unique_ptr<Decl> parse_declarator();
     std::unique_ptr<DirectDecl> parse_direct_declarator();

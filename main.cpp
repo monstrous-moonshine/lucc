@@ -45,8 +45,12 @@ int main(int argc, char *argv[]) {
         }
     }
 #endif
-    auto decl = parser.parse_external_decl();
-    if (decl) decl->print(0);
+    auto decls = parser.parse_trans_unit();
+    if (decls) {
+        for (auto &decl: *decls) {
+            decl->print(0);
+        }
+    }
     else {
         fprintf(stderr, "Parse error\n");
     }
