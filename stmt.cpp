@@ -33,6 +33,7 @@ void IfStmtAST::print(int level) {
     printf(")\n");
     then_branch->print(level + 2);
     if (else_branch) {
+        blank(level);
         printf("else\n");
         else_branch->print(level + 2);
     }
