@@ -26,6 +26,13 @@ public:
     void print() override;
 };
 
+class StringExprAST : public ExprAST {
+    std::string str;
+public:
+    StringExprAST(std::string &&str) : str(str) {}
+    void print() override;
+};
+
 class IndexExprAst : public ExprAST {
     std::unique_ptr<ExprAST> base;
     std::unique_ptr<ExprAST> index;

@@ -35,6 +35,7 @@ private:
 
     std::unique_ptr<ExprAST> variable();
     std::unique_ptr<ExprAST> number();
+    std::unique_ptr<ExprAST> string();
     std::unique_ptr<ExprAST> grouping();
     std::unique_ptr<ExprAST> index(std::unique_ptr<ExprAST>);
     std::unique_ptr<ExprAST> call(std::unique_ptr<ExprAST>);
@@ -64,7 +65,7 @@ private:
     static constexpr ExprRule expr_rules[] = {
     /* IDENT     */ {&Parser::variable, NULL, 0},
     /* INT_CONST */ {&Parser::number, NULL, 0},
-    /* STRING    */ {NULL, NULL, 0},
+    /* STRING    */ {&Parser::string, NULL, 0},
     /* LPAREN    */ {&Parser::grouping, &Parser::call, 14},
     /* RPAREN    */ {NULL, NULL, 0},
     /* LBRACKET  */ {NULL, &Parser::index, 14},

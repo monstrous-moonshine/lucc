@@ -9,6 +9,10 @@ void NumberExprAST::print() {
     printf("%.0lf", v);
 }
 
+void StringExprAST::print() {
+    printf("\"%s\"", &str[0]);
+}
+
 void IndexExprAst::print() {
     printf("([] ");
     base->print();

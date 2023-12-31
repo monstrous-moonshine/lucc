@@ -289,6 +289,12 @@ std::unique_ptr<ExprAST> Parser::number() {
     return std::make_unique<NumberExprAST>(v);
 }
 
+std::unique_ptr<ExprAST> Parser::string() {
+    auto str = prev.lexeme;
+    advance();
+    return std::make_unique<StringExprAST>(std::move(str));
+}
+
 std::unique_ptr<ExprAST> Parser::grouping() {
     advance();  // '('
     auto e = parse_expr(0);
