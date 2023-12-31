@@ -18,11 +18,7 @@
     advance();                         \
 })
 
-std::unique_ptr<DeclAST> Parser::parse_decl() {
-    return parse_decl(false, false);
-}
-
-std::unique_ptr<DeclAST> Parser::parse_decl(bool is_param, bool can_fail) {
+Token Parser::parse_type_spec() {
     Token type;
     switch (prev.type) {
     case TOK_T_VOID:
@@ -36,25 +32,26 @@ std::unique_ptr<DeclAST> Parser::parse_decl(bool is_param, bool can_fail) {
     case TOK_T_UNSIGNED:
         type = prev;
         advance();
-        break;
+        return type;
     default:
-        if (!can_fail)
-            fprintf(stderr, "Expect type specifier\n");
+        return {TOK_ERR, ""};
+    }
+}
+
+std::unique_ptr<DeclAST> Parser::parse_external_decl() {
+    Token type = parse_type_spec();
+    if (type.type == TOK_ERR) {
+        fprintf(stderr, "Expect type specifier\n");
         return NULL;
     }
     auto decl = parse_declarator();
     if (!decl) return NULL;
-    if (is_param) return std::make_unique<DeclAST>(
-            true, type, std::move(decl), nullptr);
-    if (prev.type == TOK_SEMICOLON) {
-        advance();
+    if (match(TOK_SEMICOLON)) {
         return std::make_unique<DeclAST>(false, type, std::move(decl), nullptr);
-    } else if (prev.type == TOK_LBRACE) {
-        advance();
+    } else if (match(TOK_LBRACE)) {
         auto body = block_stmt();
         if (!body) return NULL;
-        return std::make_unique<DeclAST>(false, type,
-                                         std::move(decl),
+        return std::make_unique<DeclAST>(false, type, std::move(decl),
                                          std::move(body));
     } else {
         fprintf(stderr, "Expect ';' or '{'\n");
@@ -62,10 +59,20 @@ std::unique_ptr<DeclAST> Parser::parse_decl(bool is_param, bool can_fail) {
     }
 }
 
+std::unique_ptr<DeclAST> Parser::parse_param_decl() {
+    Token type = parse_type_spec();
+    if (type.type == TOK_ERR) {
+        fprintf(stderr, "Expect type specifier\n");
+        return NULL;
+    }
+    auto decl = parse_declarator();
+    if (!decl) return NULL;
+    return std::make_unique<DeclAST>(true, type, std::move(decl), nullptr);
+}
+
 std::unique_ptr<Decl> Parser::parse_declarator() {
     int ptr_level = 0;
-    while (prev.type == TOK_STAR) {
-        advance();
+    while (match(TOK_STAR)) {
         ptr_level++;
     }
     auto decl = parse_direct_declarator();
@@ -78,38 +85,34 @@ std::unique_ptr<DirectDecl> Parser::parse_direct_declarator() {
     if (prev.type == TOK_IDENT) {
         decl = std::make_unique<VarDecl>(std::move(prev.lexeme));
         advance();
-    } else if (prev.type == TOK_LPAREN) {
-        advance();
+    } else if (match(TOK_LPAREN)) {
         decl = parse_declarator();
+        if (!decl) return NULL;
         consume(TOK_RPAREN, "Expect ')'\n");
     } else {
         fprintf(stderr, "Expect identifier or '('\n");
         return NULL;
     }
-    if (prev.type == TOK_LBRACKET) {
-        advance();
-        if (prev.type == TOK_RBRACKET) {
-            advance();
+    if (match(TOK_LBRACKET)) {
+        if (match(TOK_RBRACKET)) {
             return std::make_unique<ArrayDecl>(std::move(decl), nullptr);
         } else {
             auto e = parse_expr(2);
+            if (!e) return NULL;
             consume(TOK_RBRACKET, "Expect ']'\n");
             return std::make_unique<ArrayDecl>(std::move(decl), std::move(e));
         }
-    } else if (prev.type == TOK_LPAREN) {
-        advance();
-        if (prev.type == TOK_RPAREN) {
-            advance();
+    } else if (match(TOK_LPAREN)) {
+        if (match(TOK_RPAREN)) {
             return std::make_unique<FuncDecl>(std::move(decl), nullptr);
         } else {
             std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> params(
                     new std::vector<std::unique_ptr<DeclAST>>);
-            auto param_decl = parse_decl(true, false);
+            auto param_decl = parse_param_decl();
             if (!param_decl) return NULL;
             params->emplace_back(std::move(param_decl));
-            while (prev.type == TOK_COMMA) {
-                advance();
-                auto param_decl = parse_decl(true, false);
+            while (match(TOK_COMMA)) {
+                auto param_decl = parse_param_decl();
                 if (!param_decl) return NULL;
                 params->emplace_back(std::move(param_decl));
             }
@@ -161,6 +164,7 @@ retry:
     default:
         {
             auto e = parse_expr(0);
+            if (!e) return NULL;
             consume(TOK_SEMICOLON, "Expect ';'\n");
             return std::make_unique<ExprStmtAST>(std::move(e));
         }
@@ -178,9 +182,13 @@ std::unique_ptr<StmtAST> Parser::block_stmt() {
                                               std::move(stmts));
     }
     while (prev.type != TOK_RBRACE) {
-        auto decl = parse_decl(false, true);
-        if (!decl) break;
-        decls->emplace_back(std::move(decl));
+        Token type = parse_type_spec();
+        if (type.type == TOK_EOF) break;
+        auto decl = parse_declarator();
+        if (!decl) return NULL;
+        auto decl_ast = std::make_unique<DeclAST>(false, type, std::move(decl),
+                                                  nullptr);
+        decls->emplace_back(std::move(decl_ast));
     }
     while (prev.type != TOK_RBRACE) {
         auto stmt = parse_stmt();
@@ -198,9 +206,8 @@ std::unique_ptr<StmtAST> Parser::if_stmt() {
     consume(TOK_RPAREN, "Expect ')'\n");
     auto then_arm = parse_stmt();
     if (!then_arm) return NULL;
-    std::unique_ptr<StmtAST> else_arm(nullptr);
-    if (prev.type == TOK_K_ELSE) {
-        advance();
+    std::unique_ptr<StmtAST> else_arm;
+    if (match(TOK_K_ELSE)) {
         else_arm = parse_stmt();
         if (!else_arm) return NULL;
     }
@@ -220,8 +227,7 @@ std::unique_ptr<StmtAST> Parser::while_stmt() {
 }
 
 std::unique_ptr<StmtAST> Parser::return_stmt() {
-    if (prev.type == TOK_SEMICOLON) {
-        advance();
+    if (match(TOK_SEMICOLON)) {
         return std::make_unique<ReturnStmtAST>(nullptr);
     }
     auto e = parse_expr(0);
@@ -242,6 +248,7 @@ std::unique_ptr<ExprAST> Parser::parse_expr(int prec) {
     while (prec < get_expr_precedence()) {
         auto infix_fn = get_expr_rule(prev.type)->infix;
         e = std::invoke(infix_fn, *this, std::move(e));
+        if (!e) return NULL;
     }
     return e;
 }
@@ -276,8 +283,7 @@ std::unique_ptr<ExprAST> Parser::index(std::unique_ptr<ExprAST> e) {
 
 std::unique_ptr<ExprAST> Parser::call(std::unique_ptr<ExprAST> e) {
     advance();  // '('
-    if (prev.type == TOK_RPAREN) {
-        advance();
+    if (match(TOK_RPAREN)) {
         return std::make_unique<CallExprAST>(std::move(e), nullptr);
     }
     std::unique_ptr<std::vector<std::unique_ptr<ExprAST>>> args(
@@ -285,8 +291,7 @@ std::unique_ptr<ExprAST> Parser::call(std::unique_ptr<ExprAST> e) {
     auto a = parse_expr(1);  // PREC_COMMA
     if (!a) return NULL;
     args->emplace_back(std::move(a));
-    while (prev.type == TOK_COMMA) {
-        advance();
+    while (match(TOK_COMMA)) {
         auto a = parse_expr(1);  // PREC_COMMA
         if (!a) return NULL;
         args->emplace_back(std::move(a));
@@ -314,7 +319,7 @@ std::unique_ptr<ExprAST> Parser::binary(std::unique_ptr<ExprAST> e) {
      * will check for point 2 in the semantic analysis phase.
      */
     Token token = prev;
-    int   prec = get_expr_precedence() - (prev.type == TOK_ASSIGN ? 1 : 0);
+    int prec = get_expr_precedence() - (prev.type == TOK_ASSIGN ? 1 : 0);
     advance();
     auto f = parse_expr(prec);
     if (!f) return NULL;

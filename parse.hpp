@@ -12,14 +12,22 @@ class DirectDecl;
 class Parser {
 public:
     Parser(Scanner &scanner) : scanner(scanner) { advance(); }
-    std::unique_ptr<DeclAST> parse_decl();
+    std::unique_ptr<DeclAST> parse_external_decl();
 private:
     Scanner &scanner;
     Token prev;
 
     void advance() { prev = scanner.scan(); }
+    bool match(TokenType type) {
+        if (prev.type == type) {
+            advance();
+            return true;
+        }
+        return false;
+    }
 
-    std::unique_ptr<DeclAST> parse_decl(bool is_param, bool can_fail);
+    Token parse_type_spec();
+    std::unique_ptr<DeclAST> parse_param_decl();
     std::unique_ptr<Decl> parse_declarator();
     std::unique_ptr<DirectDecl> parse_direct_declarator();
     std::unique_ptr<StmtAST> parse_stmt();

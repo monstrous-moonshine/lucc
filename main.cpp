@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
         }
     }
 #endif
-    auto decl = parser.parse_decl();
+    auto decl = parser.parse_external_decl();
     if (decl) decl->print(0);
     else {
         fprintf(stderr, "Parse error\n");
