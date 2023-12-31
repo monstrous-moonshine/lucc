@@ -10,6 +10,21 @@ class Decl;
 class StmtAST;
 
 class DeclAST {
+    // The only thing that'll definitely be present is type.
+    // If it's a data or prototype declaration, body will be
+    // absent. In addition, if it's a parameter declaration,
+    // decl might be absent too, like in this example:
+    //
+    // int foo(int, float);
+    //
+    // To rephrase, non-parameter declarations can be:
+    // - data or prototype declaration: ends in ';'
+    // - function definition: ends in block stmt
+    //
+    // While parameter declarations have:
+    // - no body
+    // - possibly no decl
+    //
     bool is_param;
     Token type;
     std::unique_ptr<Decl> decl;
