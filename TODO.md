@@ -1,5 +1,7 @@
 1. Refactor `parse_stmt` using function array?
 2. Add line number to token, improve error reporting
+3. Implement missing keywords or flag them, don't silently treat them
+   as identifiers
 
 Unimplemented syntax:
 - Declaration
