@@ -142,8 +142,10 @@ retry:
         fprintf(stderr, "Invalid token 'else'\n");
         return NULL;
     case TOK_K_SWITCH:
-    case TOK_K_FOR:
         return NULL;
+    case TOK_K_FOR:
+        advance();
+        return for_stmt();
     case TOK_K_WHILE:
         advance();
         return while_stmt();
@@ -210,6 +212,32 @@ std::unique_ptr<StmtAST> Parser::if_stmt() {
     return std::make_unique<IfStmtAST>(std::move(cond),
                                        std::move(then_arm),
                                        std::move(else_arm));
+}
+
+std::unique_ptr<StmtAST> Parser::for_stmt() {
+    consume(TOK_LPAREN, "Expect '('\n");
+    std::unique_ptr<ExprAST> init;
+    std::unique_ptr<ExprAST> cond;
+    std::unique_ptr<ExprAST> incr;
+    if (!match(TOK_SEMICOLON)) {
+        init = parse_expr(0);
+        if (!init) return NULL;
+        consume(TOK_SEMICOLON, "Expect ';'\n");
+    }
+    if (!match(TOK_SEMICOLON)) {
+        cond = parse_expr(0);
+        if (!cond) return NULL;
+        consume(TOK_SEMICOLON, "Expect ';'\n");
+    }
+    if (!match(TOK_RPAREN)) {
+        incr = parse_expr(0);
+        if (!incr) return NULL;
+        consume(TOK_RPAREN, "Expect ')'\n");
+    }
+    auto body = parse_stmt();
+    if (!body) return NULL;
+    return std::make_unique<ForStmtAST>(std::move(init), std::move(cond),
+                                        std::move(incr), std::move(body));
 }
 
 std::unique_ptr<StmtAST> Parser::while_stmt() {

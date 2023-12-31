@@ -42,6 +42,18 @@ void IfStmtAST::print(int level) {
     }
 }
 
+void ForStmtAST::print(int level) {
+    blank(level);
+    printf("for (");
+    if (init) init->print();
+    printf("; ");
+    if (cond) cond->print();
+    printf("; ");
+    if (incr) incr->print();
+    printf(")\n");
+    body->print(level + 2);
+}
+
 void WhileStmtAST::print(int level) {
     blank(level);
     printf("while (");

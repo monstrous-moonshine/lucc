@@ -43,6 +43,21 @@ public:
     void print(int level) override;
 };
 
+class ForStmtAST : public StmtAST {
+    std::unique_ptr<ExprAST> init;
+    std::unique_ptr<ExprAST> cond;
+    std::unique_ptr<ExprAST> incr;
+    std::unique_ptr<StmtAST> body;
+public:
+    ForStmtAST(std::unique_ptr<ExprAST> init,
+               std::unique_ptr<ExprAST> cond,
+               std::unique_ptr<ExprAST> incr,
+               std::unique_ptr<StmtAST> body)
+        : init(std::move(init)), cond(std::move(cond))
+        , incr(std::move(incr)), body(std::move(body)) {}
+    void print(int level) override;
+};
+
 class WhileStmtAST : public StmtAST {
     std::unique_ptr<ExprAST> cond;
     std::unique_ptr<StmtAST> body;
