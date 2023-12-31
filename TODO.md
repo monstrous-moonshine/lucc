@@ -11,7 +11,7 @@ Unimplemented syntax:
     4. Multiple declaration in single "statement": `int a, b, c, ...`
     5. Initializer in declaration: `int a = 1`
     6. Variadic function declaration: `int printf(const char *s, ...)`
-    7. Abstract declarator (`int f(int *, char)`)
+    7. Abstract declarator: `int f(int *, char)`
 - Statements
     1. Labeled statement: label, `case`, `default`
     2. Selection statement: `switch`
