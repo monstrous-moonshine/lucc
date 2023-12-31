@@ -176,16 +176,12 @@ std::unique_ptr<StmtAST> Parser::block_stmt() {
             new std::vector<std::unique_ptr<DeclAST>>);
     std::unique_ptr<std::vector<std::unique_ptr<StmtAST>>> stmts(
             new std::vector<std::unique_ptr<StmtAST>>);
-    if (prev.type == TOK_RBRACE) {
-        advance();
-        return std::make_unique<BlockStmtAST>(std::move(decls),
-                                              std::move(stmts));
-    }
     while (prev.type != TOK_RBRACE) {
         Token type = parse_type_spec();
-        if (type.type == TOK_EOF) break;
+        if (type.type == TOK_ERR) break;
         auto decl = parse_declarator();
         if (!decl) return NULL;
+        consume(TOK_SEMICOLON, "Expect ';'\n");
         auto decl_ast = std::make_unique<DeclAST>(false, type, std::move(decl),
                                                   nullptr);
         decls->emplace_back(std::move(decl_ast));
