@@ -10,7 +10,9 @@ DeclAST::DeclAST(bool is_param, Token type,
 
 void DeclAST::print(int level) {
     for (int i = 0; i < level; i++) fputc(' ', stdout);
-    printf("%s ", &type.lexeme[0]);
+    printf("%s", &type.lexeme[0]);
+    if (is_param && !decl) return;
+    printf(" ");
     decl->print(level);
     if (is_param) return;
     if (body) {

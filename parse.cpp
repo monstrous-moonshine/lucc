@@ -77,6 +77,8 @@ std::unique_ptr<DeclAST> Parser::parse_param_decl() {
         fprintf(stderr, "Expect type specifier\n");
         return NULL;
     }
+    if (prev.type == TOK_COMMA || prev.type == TOK_RPAREN)
+        return std::make_unique<DeclAST>(true, type, nullptr, nullptr);
     auto decl = parse_declarator();
     if (!decl) return NULL;
     return std::make_unique<DeclAST>(true, type, std::move(decl), nullptr);
