@@ -179,6 +179,17 @@ retry:
     case TOK_K_DO:
         advance();
         return do_stmt();
+    case TOK_K_GOTO:
+        fprintf(stderr, "'goto' statement not supported\n");
+        return NULL;
+    case TOK_K_CONTINUE:
+        advance();
+        consume(TOK_SEMICOLON, "Expect ';'\n");
+        return std::make_unique<JumpStmtAST>(JumpStmtAST::CONTINUE, nullptr);
+    case TOK_K_BREAK:
+        advance();
+        consume(TOK_SEMICOLON, "Expect ';'\n");
+        return std::make_unique<JumpStmtAST>(JumpStmtAST::BREAK, nullptr);
     case TOK_K_RETURN:
         advance();
         return return_stmt();

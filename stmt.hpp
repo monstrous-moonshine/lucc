@@ -109,6 +109,22 @@ public:
     void print(int level) override;
 };
 
+class JumpStmtAST : public StmtAST {
+public:
+    enum JumpType {
+        GOTO,
+        CONTINUE,
+        BREAK,
+    };
+private:
+    JumpType type;
+    std::unique_ptr<ExprAST> label;
+public:
+    JumpStmtAST(JumpType type, std::unique_ptr<ExprAST> label)
+        : type(type), label(std::move(label)) {}
+    void print(int level) override;
+};
+
 class ReturnStmtAST : public StmtAST {
     std::unique_ptr<ExprAST> e;
 public:

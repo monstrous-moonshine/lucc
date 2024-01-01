@@ -52,6 +52,9 @@ enum TokenType {
     TOK_K_FOR,
     TOK_K_WHILE,
     TOK_K_DO,
+    TOK_K_GOTO,
+    TOK_K_CONTINUE,
+    TOK_K_BREAK,
     TOK_K_RETURN,
     // Types
     TOK_T_VOID,

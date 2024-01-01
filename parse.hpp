@@ -54,6 +54,7 @@ private:
     std::unique_ptr<StmtAST> for_stmt();
     std::unique_ptr<StmtAST> while_stmt();
     std::unique_ptr<StmtAST> do_stmt();
+    std::unique_ptr<StmtAST> jump_stmt();
     std::unique_ptr<StmtAST> return_stmt();
 
     using Prefix = std::unique_ptr<ExprAST> (Parser::*)();

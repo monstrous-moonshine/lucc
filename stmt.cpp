@@ -98,6 +98,23 @@ void DoStmtAST::print(int level) {
     printf(")\n");
 }
 
+void JumpStmtAST::print(int level) {
+    indent(level);
+    switch (type) {
+    case GOTO:
+        printf("goto ");
+        label->print();
+        printf("\n");
+        break;
+    case CONTINUE:
+        printf("continue;\n");
+        break;
+    case BREAK:
+        printf("break;\n");
+        break;
+    }
+}
+
 void ReturnStmtAST::print(int level) {
     indent(level);
     printf("return");
