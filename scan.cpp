@@ -1,6 +1,7 @@
 #include "scan.hpp"
 #include <cctype>
 #include <unordered_map>
+#include <utility>
 
 #define ARRAY_LEN(a) (sizeof a / sizeof a[0])
 #define CUR_LEX std::string(beg, end)
