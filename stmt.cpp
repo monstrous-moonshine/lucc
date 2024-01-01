@@ -4,26 +4,25 @@
 namespace
 {
 
-void blank(int level) {
+void indent(int level) {
     for (int i = 0; i < level; i++) fputc(' ', stdout);
 }
 
 }
 
 void LabelStmtAST::print(int level) {
+    indent(level - 2);
     switch (type) {
     case LABEL:
         label->print();
         printf(":\n");
         break;
     case CASE:
-        blank(level - 2);
         printf("case ");
         case_exp->print();
         printf(":\n");
         break;
     case DEFAULT:
-        blank(level - 2);
         printf("default:\n");
         break;
     }
@@ -31,13 +30,13 @@ void LabelStmtAST::print(int level) {
 }
 
 void ExprStmtAST::print(int level) {
-    blank(level);
+    indent(level);
     e->print();
     printf(";\n");
 }
 
 void BlockStmtAST::print(int level) {
-    blank(level);
+    indent(level);
     printf("{\n");
     for (auto &decl: *decls) {
         decl->print(level + 2);
@@ -45,25 +44,25 @@ void BlockStmtAST::print(int level) {
     for (auto &stmt: *stmts) {
         stmt->print(level + 2);
     }
-    blank(level);
+    indent(level);
     printf("}\n");
 }
 
 void IfStmtAST::print(int level) {
-    blank(level);
+    indent(level);
     printf("if (");
     cond->print();
     printf(")\n");
     then_branch->print(level + 2);
     if (else_branch) {
-        blank(level);
+        indent(level);
         printf("else\n");
         else_branch->print(level + 2);
     }
 }
 
 void SwitchStmtAST::print(int level) {
-    blank(level);
+    indent(level);
     printf("switch (");
     cond->print();
     printf(")\n");
@@ -71,7 +70,7 @@ void SwitchStmtAST::print(int level) {
 }
 
 void ForStmtAST::print(int level) {
-    blank(level);
+    indent(level);
     printf("for (");
     if (init) init->print();
     printf("; ");
@@ -83,7 +82,7 @@ void ForStmtAST::print(int level) {
 }
 
 void WhileStmtAST::print(int level) {
-    blank(level);
+    indent(level);
     printf("while (");
     cond->print();
     printf(")\n");
@@ -91,7 +90,7 @@ void WhileStmtAST::print(int level) {
 }
 
 void DoStmtAST::print(int level) {
-    blank(level);
+    indent(level);
     printf("do\n");
     body->print(level + 2);
     printf("while (");
@@ -100,7 +99,7 @@ void DoStmtAST::print(int level) {
 }
 
 void ReturnStmtAST::print(int level) {
-    blank(level);
+    indent(level);
     printf("return");
     if (e) {
         printf(" ");
