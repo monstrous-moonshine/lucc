@@ -5,9 +5,12 @@ int switch_test(int a, int b)
     c = a + b;
     switch (c)
     {
-    case 1: d = 1;
-    case 2: d = 2;
-    default: d = 3;
+    case 1: d = 1; break;
+    case 2: d = 2; break;
+    default: d = 3; break;
+    }
+    for(;;) {
+        if (d--) continue;
     }
     return d;
 }
