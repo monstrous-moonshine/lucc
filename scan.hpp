@@ -16,6 +16,7 @@ enum TokenType {
     TOK_DECR,
     TOK_TILDE,
     TOK_BANG,
+    TOK_SIZEOF,
     TOK_STAR,
     TOK_SLASH,
     TOK_MOD,

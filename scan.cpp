@@ -30,6 +30,7 @@ inline bool isalpha_(char c) {
 }
 
 const std::unordered_map<std::string, TokenType> keywords = {
+    {"sizeof", TOK_SIZEOF},
     {"case", TOK_K_CASE},
     {"default", TOK_K_DEFAULT},
     {"if", TOK_K_IF},

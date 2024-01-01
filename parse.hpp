@@ -86,6 +86,7 @@ private:
     /* DECR      */ {&Parser::unary, &Parser::postfix, 14},
     /* TILDE     */ {&Parser::unary, NULL, 0},
     /* BANG      */ {&Parser::unary, NULL, 0},
+    /* SIZEOF    */ {NULL, NULL, 0},
     /* STAR      */ {&Parser::unary, &Parser::binary, 13},
     /* SLASH     */ {NULL, &Parser::binary, 13},
     /* MOD       */ {NULL, &Parser::binary, 13},
