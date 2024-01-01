@@ -6,7 +6,8 @@
 Unimplemented syntax:
 - Declaration
     1. Storage class specifier: `auto`, `register`, `static`, `extern`, `typedef`
-    2. Type specifier: `struct`, `union`, `enum`, `typedef_name`
+    2. Type specifier: `struct`, `union`, `enum`, `typedef_name`, combination
+       of basic types (e.g., `unsigned char`)
     3. Type qualifier: `const`, `volatile`
     4. Multiple declaration in single "statement": `int a, b, c, ...`
     5. Initializer in declaration: `int a = 1`
