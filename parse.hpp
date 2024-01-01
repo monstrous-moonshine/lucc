@@ -56,8 +56,10 @@ private:
     std::unique_ptr<StmtAST> for_stmt();
     std::unique_ptr<StmtAST> while_stmt();
     std::unique_ptr<StmtAST> do_stmt();
-    std::unique_ptr<StmtAST> jump_stmt();
+    std::unique_ptr<StmtAST> continue_stmt();
+    std::unique_ptr<StmtAST> break_stmt();
     std::unique_ptr<StmtAST> return_stmt();
+    std::unique_ptr<StmtAST> empty_stmt();
 
     using Prefix = std::unique_ptr<ExprAST> (Parser::*)();
     using Infix  = std::unique_ptr<ExprAST> (Parser::*)(
@@ -106,6 +108,26 @@ private:
     /* COLON     */ {NULL, NULL, 0},
     /* ASSIGN    */ {NULL, &Parser::binary, 2},
     /* COMMA     */ {NULL, NULL, 1},
+    };
+
+    using StmtParser = std::unique_ptr<StmtAST> (Parser::*)();
+    StmtParser get_stmt_parser(TokenType type);
+    static constexpr StmtParser stmt_parsers[] = {
+        &Parser::case_stmt,
+        &Parser::default_stmt,
+        &Parser::if_stmt,
+        NULL,  // else
+        &Parser::switch_stmt,
+        &Parser::for_stmt,
+        &Parser::while_stmt,
+        &Parser::do_stmt,
+        NULL,  // goto
+        &Parser::continue_stmt,
+        &Parser::break_stmt,
+        &Parser::return_stmt,
+        &Parser::block_stmt,
+        NULL, // '}'
+        &Parser::empty_stmt,
     };
 };
 #endif

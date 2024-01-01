@@ -124,3 +124,8 @@ void ReturnStmtAST::print(int level) {
     }
     printf(";\n");
 }
+
+void EmptyStmtAST::print(int level) {
+    indent(level);
+    printf(";\n");
+}

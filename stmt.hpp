@@ -131,4 +131,9 @@ public:
     ReturnStmtAST(std::unique_ptr<ExprAST> e) : e(std::move(e)) {}
     void print(int level) override;
 };
+
+class EmptyStmtAST : public StmtAST {
+public:
+    void print(int level) override;
+};
 #endif

@@ -156,7 +156,6 @@ std::unique_ptr<DirectDecl> Parser::parse_func_decl(std::unique_ptr<DirectDecl> 
 }
 
 std::unique_ptr<StmtAST> Parser::parse_stmt() {
-retry:
     if (prev.type == TOK_ERR) {
         fprintf(stderr, "Unrecognized token\n");
         return NULL;
@@ -165,61 +164,15 @@ retry:
         fprintf(stderr, "End of file reached\n");
         return NULL;
     }
-    switch (prev.type) {
-    case TOK_K_CASE:
-        advance();
-        return case_stmt();
-    case TOK_K_DEFAULT:
-        advance();
-        return default_stmt();
-    case TOK_K_IF:
-        advance();
-        return if_stmt();
-    case TOK_K_ELSE:
-        fprintf(stderr, "Invalid token 'else'\n");
-        return NULL;
-    case TOK_K_SWITCH:
-        advance();
-        return switch_stmt();
-    case TOK_K_FOR:
-        advance();
-        return for_stmt();
-    case TOK_K_WHILE:
-        advance();
-        return while_stmt();
-    case TOK_K_DO:
-        advance();
-        return do_stmt();
-    case TOK_K_GOTO:
-        fprintf(stderr, "'goto' statement not supported\n");
-        return NULL;
-    case TOK_K_CONTINUE:
-        advance();
+    StmtParser parser = get_stmt_parser(prev.type);
+    if (!parser) {
+        auto e = parse_expr(0);
+        if (!e) return NULL;
         consume(TOK_SEMICOLON, "Expect ';'\n");
-        return std::make_unique<JumpStmtAST>(JumpStmtAST::CONTINUE, nullptr);
-    case TOK_K_BREAK:
+        return std::make_unique<ExprStmtAST>(std::move(e));
+    } else {
         advance();
-        consume(TOK_SEMICOLON, "Expect ';'\n");
-        return std::make_unique<JumpStmtAST>(JumpStmtAST::BREAK, nullptr);
-    case TOK_K_RETURN:
-        advance();
-        return return_stmt();
-    case TOK_LBRACE:
-        advance();
-        return block_stmt();
-    case TOK_RBRACE:
-        fprintf(stderr, "Invalid token '}'\n");
-        return NULL;
-    case TOK_SEMICOLON:
-        advance();
-        goto retry;
-    default:
-        {
-            auto e = parse_expr(0);
-            if (!e) return NULL;
-            consume(TOK_SEMICOLON, "Expect ';'\n");
-            return std::make_unique<ExprStmtAST>(std::move(e));
-        }
+        return std::invoke(parser, *this);
     }
 }
 
@@ -337,6 +290,16 @@ std::unique_ptr<StmtAST> Parser::do_stmt() {
     return std::make_unique<DoStmtAST>(std::move(cond), std::move(body));
 }
 
+std::unique_ptr<StmtAST> Parser::continue_stmt() {
+    consume(TOK_SEMICOLON, "Expect ';'\n");
+    return std::make_unique<JumpStmtAST>(JumpStmtAST::CONTINUE, nullptr);
+}
+
+std::unique_ptr<StmtAST> Parser::break_stmt() {
+    consume(TOK_SEMICOLON, "Expect ';'\n");
+    return std::make_unique<JumpStmtAST>(JumpStmtAST::BREAK, nullptr);
+}
+
 std::unique_ptr<StmtAST> Parser::return_stmt() {
     if (match(TOK_SEMICOLON)) {
         return std::make_unique<ReturnStmtAST>(nullptr);
@@ -344,6 +307,15 @@ std::unique_ptr<StmtAST> Parser::return_stmt() {
     auto e = parse_expr(0);
     consume(TOK_SEMICOLON, "Expect ';'\n");
     return std::make_unique<ReturnStmtAST>(std::move(e));
+}
+
+std::unique_ptr<StmtAST> Parser::empty_stmt() {
+    return std::make_unique<EmptyStmtAST>();
+}
+
+Parser::StmtParser Parser::get_stmt_parser(TokenType type) {
+    size_t idx = type - TOK_K_CASE;
+    return idx < ARRAY_LEN(stmt_parsers) ? stmt_parsers[idx] : NULL;
 }
 
 std::unique_ptr<ExprAST> Parser::parse_expr(int prec) {

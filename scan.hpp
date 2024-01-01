@@ -37,12 +37,7 @@ enum TokenType {
     TOK_QUERY,
     TOK_COLON,
     TOK_ASSIGN,
-    // Statement related
     TOK_COMMA,
-    TOK_LBRACE,
-    TOK_RBRACE,
-    TOK_SEMICOLON,
-    TOK_ELLIPSIS,
     // Statements
     TOK_K_CASE,
     TOK_K_DEFAULT,
@@ -56,6 +51,12 @@ enum TokenType {
     TOK_K_CONTINUE,
     TOK_K_BREAK,
     TOK_K_RETURN,
+    // Statement related
+    TOK_LBRACE,
+    TOK_RBRACE,
+    TOK_SEMICOLON,
+    // Function declaration
+    TOK_ELLIPSIS,
     // Types
     TOK_T_VOID,
     TOK_T_CHAR,
