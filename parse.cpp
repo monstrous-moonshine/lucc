@@ -156,14 +156,6 @@ std::unique_ptr<DirectDecl> Parser::parse_func_decl(std::unique_ptr<DirectDecl> 
 }
 
 std::unique_ptr<StmtAST> Parser::parse_stmt() {
-    if (prev.type == TOK_ERR) {
-        fprintf(stderr, "Unrecognized token\n");
-        return NULL;
-    }
-    if (prev.type == TOK_EOF) {
-        fprintf(stderr, "End of file reached\n");
-        return NULL;
-    }
     StmtParser parser = get_stmt_parser(prev.type);
     if (!parser) {
         auto e = parse_expr(0);
