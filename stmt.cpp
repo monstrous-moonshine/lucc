@@ -10,6 +10,26 @@ void blank(int level) {
 
 }
 
+void LabelStmtAST::print(int level) {
+    switch (type) {
+    case LABEL:
+        label->print();
+        printf(":\n");
+        break;
+    case CASE:
+        blank(level);
+        printf("case ");
+        case_exp->print();
+        printf(":\n");
+        break;
+    case DEFAULT:
+        blank(level);
+        printf("default:\n");
+        break;
+    }
+    stmt->print(level);
+}
+
 void ExprStmtAST::print(int level) {
     blank(level);
     e->print();
@@ -40,6 +60,14 @@ void IfStmtAST::print(int level) {
         printf("else\n");
         else_branch->print(level + 2);
     }
+}
+
+void SwitchStmtAST::print(int level) {
+    blank(level);
+    printf("switch (");
+    cond->print();
+    printf(")\n");
+    body->print(level + 2);
 }
 
 void ForStmtAST::print(int level) {

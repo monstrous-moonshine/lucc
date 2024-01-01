@@ -149,6 +149,12 @@ retry:
         return NULL;
     }
     switch (prev.type) {
+    case TOK_K_CASE:
+        advance();
+        return case_stmt();
+    case TOK_K_DEFAULT:
+        advance();
+        return default_stmt();
     case TOK_K_IF:
         advance();
         return if_stmt();
@@ -156,7 +162,8 @@ retry:
         fprintf(stderr, "Invalid token 'else'\n");
         return NULL;
     case TOK_K_SWITCH:
-        return NULL;
+        advance();
+        return switch_stmt();
     case TOK_K_FOR:
         advance();
         return for_stmt();
@@ -186,6 +193,22 @@ retry:
             return std::make_unique<ExprStmtAST>(std::move(e));
         }
     }
+}
+
+std::unique_ptr<StmtAST> Parser::case_stmt() {
+    auto e = parse_expr(2);
+    if (!e) return NULL;
+    consume(TOK_COLON, "Expect ':'\n");
+    auto stmt = parse_stmt();
+    return std::make_unique<LabelStmtAST>(LabelStmtAST::CASE, nullptr,
+                                          std::move(e), std::move(stmt));
+}
+
+std::unique_ptr<StmtAST> Parser::default_stmt() {
+    consume(TOK_COLON, "Expect ':'\n");
+    auto stmt = parse_stmt();
+    return std::make_unique<LabelStmtAST>(LabelStmtAST::DEFAULT, nullptr,
+                                          nullptr, std::move(stmt));
 }
 
 std::unique_ptr<StmtAST> Parser::block_stmt() {
@@ -224,9 +247,18 @@ std::unique_ptr<StmtAST> Parser::if_stmt() {
         else_arm = parse_stmt();
         if (!else_arm) return NULL;
     }
-    return std::make_unique<IfStmtAST>(std::move(cond),
-                                       std::move(then_arm),
+    return std::make_unique<IfStmtAST>(std::move(cond), std::move(then_arm),
                                        std::move(else_arm));
+}
+
+std::unique_ptr<StmtAST> Parser::switch_stmt() {
+    consume(TOK_LPAREN, "Expect '('\n");
+    auto cond = parse_expr(0);
+    if (!cond) return NULL;
+    consume(TOK_RPAREN, "Expect ')'\n");
+    auto body = parse_stmt();
+    if (!body) return NULL;
+    return std::make_unique<SwitchStmtAST>(std::move(cond), std::move(body));
 }
 
 std::unique_ptr<StmtAST> Parser::for_stmt() {
@@ -397,8 +429,7 @@ std::unique_ptr<ExprAST> Parser::ternary(std::unique_ptr<ExprAST> e) {
     consume(TOK_COLON, "Expect ':'\n");
     auto else_expr = parse_expr(2);
     if (!else_expr) return NULL;
-    return std::make_unique<TernaryExprAST>(std::move(e),
-                                            std::move(then_expr),
+    return std::make_unique<TernaryExprAST>(std::move(e), std::move(then_expr),
                                             std::move(else_expr));
 }
 

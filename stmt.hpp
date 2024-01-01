@@ -12,6 +12,27 @@ public:
     virtual void print(int level) = 0;
 };
 
+class LabelStmtAST : public StmtAST {
+public:
+    enum LabelType {
+        LABEL,
+        CASE,
+        DEFAULT,
+    };
+private:
+    LabelType type;
+    std::unique_ptr<ExprAST> label;
+    std::unique_ptr<ExprAST> case_exp;
+    std::unique_ptr<StmtAST> stmt;
+public:
+    LabelStmtAST(LabelType type, std::unique_ptr<ExprAST> label,
+                 std::unique_ptr<ExprAST> case_exp,
+                 std::unique_ptr<StmtAST> stmt)
+        : type(type), label(std::move(label))
+        , case_exp(std::move(case_exp)), stmt(std::move(stmt)) {}
+    void print(int level) override;
+};
+
 class ExprStmtAST : public StmtAST {
     std::unique_ptr<ExprAST> e;
 public:
@@ -40,6 +61,16 @@ public:
         : cond(std::move(cond))
         , then_branch(std::move(then_branch))
         , else_branch(std::move(else_branch)) {}
+    void print(int level) override;
+};
+
+class SwitchStmtAST : public StmtAST {
+    std::unique_ptr<ExprAST> cond;
+    std::unique_ptr<StmtAST> body;
+public:
+    SwitchStmtAST(std::unique_ptr<ExprAST> cond,
+                  std::unique_ptr<StmtAST> body)
+        : cond(std::move(cond)), body(std::move(body)) {}
     void print(int level) override;
 };
 

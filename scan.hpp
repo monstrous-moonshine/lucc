@@ -43,6 +43,8 @@ enum TokenType {
     TOK_RBRACE,
     TOK_SEMICOLON,
     // Statements
+    TOK_K_CASE,
+    TOK_K_DEFAULT,
     TOK_K_IF,
     TOK_K_ELSE,
     TOK_K_SWITCH,
