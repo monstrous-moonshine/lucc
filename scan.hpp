@@ -67,6 +67,18 @@ enum TokenType {
     TOK_T_DOUBLE,
     TOK_T_SIGNED,
     TOK_T_UNSIGNED,
+    TOK_T_STRUCT,
+    TOK_T_UNION,
+    TOK_T_ENUM,
+    // Storage class
+    TOK_T_AUTO,
+    TOK_T_REGISTER,
+    TOK_T_STATIC,
+    TOK_T_EXTERN,
+    TOK_T_TYPEDEF,
+    // Type qualifier
+    TOK_T_CONST,
+    TOK_T_VOLATILE,
     // Special
     TOK_EOF,
     TOK_ERR,

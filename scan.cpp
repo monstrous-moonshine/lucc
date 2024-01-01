@@ -51,6 +51,16 @@ const std::unordered_map<std::string, TokenType> keywords = {
     {"double", TOK_T_DOUBLE},
     {"signed", TOK_T_SIGNED},
     {"unsigned", TOK_T_UNSIGNED},
+    {"struct", TOK_T_STRUCT},
+    {"union", TOK_T_UNION},
+    {"enum", TOK_T_ENUM},
+    {"auto", TOK_T_AUTO},
+    {"register", TOK_T_REGISTER},
+    {"static", TOK_T_STATIC},
+    {"extern", TOK_T_EXTERN},
+    {"typedef", TOK_T_TYPEDEF},
+    {"const", TOK_T_CONST},
+    {"volatile", TOK_T_VOLATILE},
 };
 
 }  // namespace
