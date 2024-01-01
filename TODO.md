@@ -18,7 +18,8 @@ Unimplemented syntax:
 - Expression
     1. Comma operator
     2. Compound assignment operators
-    3. Cast expression
-    4. `sizeof` operator
-    5. Postfix operators: `.`, `->`
-    6. Constants: `char_const`, `float_const`, `enum_const`
+    3. Check if target of assignment is unary expression
+    4. Cast expression
+    5. `sizeof` operator
+    6. Postfix operators: `.`, `->`
+    7. Constants: `char_const`, `float_const`, `enum_const`
