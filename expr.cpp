@@ -48,7 +48,7 @@ void BinaryExprAST::print() {
 }
 
 void TernaryExprAST::print() {
-    printf("(if ");
+    printf("(? ");
     cond->print();
     printf(" ");
     then_expr->print();
