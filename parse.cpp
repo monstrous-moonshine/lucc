@@ -118,20 +118,26 @@ std::unique_ptr<DirectDecl> Parser::parse_direct_declarator() {
         }
     } else if (match(TOK_LPAREN)) {
         if (match(TOK_RPAREN)) {
-            return std::make_unique<FuncDecl>(std::move(decl), nullptr);
+            return std::make_unique<FuncDecl>(false, std::move(decl), nullptr);
         } else {
+            bool is_variadic = false;
             std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> params(
                     new std::vector<std::unique_ptr<DeclAST>>);
             auto param_decl = parse_param_decl();
             if (!param_decl) return NULL;
             params->emplace_back(std::move(param_decl));
             while (match(TOK_COMMA)) {
+                if (match(TOK_ELLIPSIS)) {
+                    is_variadic = true;
+                    break;
+                }
                 auto param_decl = parse_param_decl();
                 if (!param_decl) return NULL;
                 params->emplace_back(std::move(param_decl));
             }
             consume(TOK_RPAREN, "Expect ')'\n");
-            return std::make_unique<FuncDecl>(std::move(decl), std::move(params));
+            return std::make_unique<FuncDecl>(is_variadic, std::move(decl),
+                                              std::move(params));
         }
     } else {
         return decl;

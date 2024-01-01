@@ -82,6 +82,7 @@ Token Scanner::scan() {
     TOK_CASE1('{', TOK_LBRACE)
     TOK_CASE1('}', TOK_RBRACE)
     TOK_CASE1(';', TOK_SEMICOLON)
+    case '.': return tok_ellipsis();
     case '\0': return {TOK_EOF, "?EOF"};
     default: return {TOK_ERR, CUR_LEX};
     }
@@ -110,6 +111,22 @@ Token Scanner::tok_string() {
     if (peek() == '\0') return {TOK_ERR, "?UNTERMINATED_STRING"};
     advance();
     return {TOK_STRING, std::string(beg + 1, end - 1)};
+}
+
+Token Scanner::tok_ellipsis() {
+    const char *p = end;
+    if (*p == '.') {
+        p++;
+        if (*p == '.') {
+            p++;
+            end = p;
+            return {TOK_ELLIPSIS, CUR_LEX};
+        } else {
+            return {TOK_ERR, ".."};
+        }
+    } else {
+        return {TOK_ERR, "."};
+    }
 }
 
 void Scanner::skip_whitespace() {

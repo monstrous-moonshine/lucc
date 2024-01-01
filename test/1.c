@@ -1,4 +1,4 @@
-int printf(char *s, int);
+int printf(char *s, ...);
 void for_test() {
     int i;
     int *j;

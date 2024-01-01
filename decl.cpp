@@ -53,5 +53,7 @@ void FuncDecl::print(int level) {
             (*params)[i]->print(level + 2);
         }
     }
+    if (is_variadic)
+        printf(", ...");
     printf(")");
 }

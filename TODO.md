@@ -10,8 +10,7 @@ Unimplemented syntax:
     3. Type qualifier: `const`, `volatile`
     4. Multiple declaration in single "statement": `int a, b, c, ...`
     5. Initializer in declaration: `int a = 1`
-    6. Variadic function declaration: `int printf(const char *s, ...)`
-    7. Abstract declarator: `int f(int *, char)`
+    6. Abstract declarator: `int f(int *, char)`
 - Statements
     1. Labeled statement: label
     2. Jump statement: `goto`, `continue`, `break`

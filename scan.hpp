@@ -42,6 +42,7 @@ enum TokenType {
     TOK_LBRACE,
     TOK_RBRACE,
     TOK_SEMICOLON,
+    TOK_ELLIPSIS,
     // Statements
     TOK_K_CASE,
     TOK_K_DEFAULT,
@@ -84,6 +85,7 @@ private:
     Token tok_ident();
     Token tok_number();
     Token tok_string();
+    Token tok_ellipsis();
     const char *beg, *end;
 };
 #endif

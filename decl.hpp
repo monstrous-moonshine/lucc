@@ -68,12 +68,14 @@ public:
 };
 
 class FuncDecl : public DirectDecl {
+    bool is_variadic;
     std::unique_ptr<DirectDecl> name;
     std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> params;
 public:
-    FuncDecl(std::unique_ptr<DirectDecl> name,
+    FuncDecl(bool is_variadic, std::unique_ptr<DirectDecl> name,
              std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> params)
-        : name(std::move(name)), params(std::move(params)) {}
+        : is_variadic(is_variadic), name(std::move(name))
+        , params(std::move(params)) {}
     void print(int level) override;
 };
 #endif
