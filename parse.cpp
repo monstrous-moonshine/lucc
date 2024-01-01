@@ -110,8 +110,10 @@ std::unique_ptr<DirectDecl> Parser::parse_direct_declarator() {
     while (prev.type == TOK_LBRACKET || prev.type == TOK_LPAREN) {
         if (match(TOK_LBRACKET)) {
             decl = parse_array_decl(std::move(decl));
+            if (!decl) return NULL;
         } else if (match(TOK_LPAREN)) {
             decl = parse_func_decl(std::move(decl));
+            if (!decl) return NULL;
         }
     }
     return decl;
