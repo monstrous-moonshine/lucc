@@ -37,7 +37,8 @@ void VarDecl::print(int, bool) {
 void ArrayDecl::print(int level, bool) {
     name->print(level, true);
     printf("[");
-    dim->print();
+    if (dim)
+        dim->print();
     printf("]");
 }
 
