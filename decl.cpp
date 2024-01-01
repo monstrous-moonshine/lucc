@@ -23,28 +23,26 @@ void DeclAST::print(int level) {
     }
 }
 
-void Decl::print(int level) {
+void Decl::print(int level, bool maybe_paren) {
+    if (maybe_paren && ptr_level > 0) printf("(");
     for (int i = 0; i < ptr_level; i++) fputc('*', stdout);
-    decl->print(level);
+    decl->print(level, false);
+    if (maybe_paren && ptr_level > 0) printf(")");
 }
 
-void VarDecl::print(int) {
+void VarDecl::print(int, bool) {
     printf("%s", &name[0]);
 }
 
-void ArrayDecl::print(int level) {
-    printf("(");
-    name->print(level);
-    printf(")");
+void ArrayDecl::print(int level, bool) {
+    name->print(level, true);
     printf("[");
     dim->print();
     printf("]");
 }
 
-void FuncDecl::print(int level) {
-    printf("(");
-    name->print(level);
-    printf(")");
+void FuncDecl::print(int level, bool) {
+    name->print(level, true);
     printf("(\n");
     if (params) {
         (*params)[0]->print(level + 2);
