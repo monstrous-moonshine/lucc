@@ -17,13 +17,13 @@ void LabelStmtAST::print(int level) {
         printf(":\n");
         break;
     case CASE:
-        blank(level);
+        blank(level - 2);
         printf("case ");
         case_exp->print();
         printf(":\n");
         break;
     case DEFAULT:
-        blank(level);
+        blank(level - 2);
         printf("default:\n");
         break;
     }
