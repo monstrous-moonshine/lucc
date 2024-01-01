@@ -107,40 +107,49 @@ std::unique_ptr<DirectDecl> Parser::parse_direct_declarator() {
         fprintf(stderr, "Expect identifier or '('\n");
         return NULL;
     }
-    if (match(TOK_LBRACKET)) {
-        if (match(TOK_RBRACKET)) {
-            return std::make_unique<ArrayDecl>(std::move(decl), nullptr);
-        } else {
-            auto e = parse_expr(2);
-            if (!e) return NULL;
-            consume(TOK_RBRACKET, "Expect ']'\n");
-            return std::make_unique<ArrayDecl>(std::move(decl), std::move(e));
+    while (prev.type == TOK_LBRACKET || prev.type == TOK_LPAREN) {
+        if (match(TOK_LBRACKET)) {
+            decl = parse_array_decl(std::move(decl));
+        } else if (match(TOK_LPAREN)) {
+            decl = parse_func_decl(std::move(decl));
         }
-    } else if (match(TOK_LPAREN)) {
-        if (match(TOK_RPAREN)) {
-            return std::make_unique<FuncDecl>(false, std::move(decl), nullptr);
-        } else {
-            bool is_variadic = false;
-            std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> params(
-                    new std::vector<std::unique_ptr<DeclAST>>);
+    }
+    return decl;
+}
+
+std::unique_ptr<DirectDecl> Parser::parse_array_decl(std::unique_ptr<DirectDecl> decl) {
+    if (match(TOK_RBRACKET)) {
+        return std::make_unique<ArrayDecl>(std::move(decl), nullptr);
+    } else {
+        auto e = parse_expr(2);
+        if (!e) return NULL;
+        consume(TOK_RBRACKET, "Expect ']'\n");
+        return std::make_unique<ArrayDecl>(std::move(decl), std::move(e));
+    }
+}
+
+std::unique_ptr<DirectDecl> Parser::parse_func_decl(std::unique_ptr<DirectDecl> decl) {
+    if (match(TOK_RPAREN)) {
+        return std::make_unique<FuncDecl>(false, std::move(decl), nullptr);
+    } else {
+        bool is_variadic = false;
+        std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> params(
+                new std::vector<std::unique_ptr<DeclAST>>);
+        auto param_decl = parse_param_decl();
+        if (!param_decl) return NULL;
+        params->emplace_back(std::move(param_decl));
+        while (match(TOK_COMMA)) {
+            if (match(TOK_ELLIPSIS)) {
+                is_variadic = true;
+                break;
+            }
             auto param_decl = parse_param_decl();
             if (!param_decl) return NULL;
             params->emplace_back(std::move(param_decl));
-            while (match(TOK_COMMA)) {
-                if (match(TOK_ELLIPSIS)) {
-                    is_variadic = true;
-                    break;
-                }
-                auto param_decl = parse_param_decl();
-                if (!param_decl) return NULL;
-                params->emplace_back(std::move(param_decl));
-            }
-            consume(TOK_RPAREN, "Expect ')'\n");
-            return std::make_unique<FuncDecl>(is_variadic, std::move(decl),
-                                              std::move(params));
         }
-    } else {
-        return decl;
+        consume(TOK_RPAREN, "Expect ')'\n");
+        return std::make_unique<FuncDecl>(is_variadic, std::move(decl),
+                std::move(params));
     }
 }
 

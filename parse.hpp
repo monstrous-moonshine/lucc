@@ -32,6 +32,8 @@ private:
     std::unique_ptr<DeclAST> parse_param_decl();
     std::unique_ptr<Decl> parse_declarator();
     std::unique_ptr<DirectDecl> parse_direct_declarator();
+    std::unique_ptr<DirectDecl> parse_array_decl(std::unique_ptr<DirectDecl>);
+    std::unique_ptr<DirectDecl> parse_func_decl(std::unique_ptr<DirectDecl>);
     std::unique_ptr<StmtAST> parse_stmt();
     std::unique_ptr<ExprAST> parse_expr(int prec);
 
