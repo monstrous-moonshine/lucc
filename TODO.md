@@ -2,6 +2,7 @@
 2. Add line number to token, improve error reporting
 3. ~~Implement missing keywords or flag them, don't silently treat them
    as identifiers~~
+4. Add tests, lot more
 
 Unimplemented syntax:
 - Declaration
