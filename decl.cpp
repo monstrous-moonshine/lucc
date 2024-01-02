@@ -2,32 +2,60 @@
 #include "stmt.hpp"
 #include <cstdio>
 
-DeclAST::DeclAST(bool is_param, Token type,
-                 std::unique_ptr<Declarator> decl,
-                 std::unique_ptr<StmtAST> body)
-    : is_param(is_param), type(type), decl(std::move(decl))
-    , body(std::move(body)) {}
+namespace
+{
 
-void DeclAST::print(int level) {
+void indent(int level) {
     for (int i = 0; i < level; i++) fputc(' ', stdout);
-    printf("%s", &type.lexeme[0]);
-    if (is_param && !decl) return;
-    printf(" ");
+}
+
+}
+
+void Declarator::print(int level, bool has_postfix) {
+    if (has_postfix && ptr_level > 0) printf("(");
+    for (int i = 0; i < ptr_level; i++) fputc('*', stdout);
+    decl->print(level, false);
+    if (has_postfix && ptr_level > 0) printf(")");
+}
+
+FuncDeclAST::FuncDeclAST(Token type, std::unique_ptr<Declarator> decl,
+                         std::unique_ptr<StmtAST> body)
+    : type(type), decl(std::move(decl)), body(std::move(body)) {}
+
+void FuncDeclAST::print(int level) {
+    indent(level);
+    printf("%s ", &type.lexeme[0]);
     decl->print(level);
-    if (is_param) return;
-    if (body) {
-        printf("\n");
-        body->print(level);
-    } else {
-        printf(";\n");
+    printf("\n");
+    body->print(level);
+}
+
+void InitDecl::print(int level) {
+    decl->print(level);
+    if (init) {
+        printf(" = ");
+        init->print();
     }
 }
 
-void Declarator::print(int level, bool paren_if_ptr) {
-    if (paren_if_ptr && ptr_level > 0) printf("(");
-    for (int i = 0; i < ptr_level; i++) fputc('*', stdout);
-    decl->print(level, false);
-    if (paren_if_ptr && ptr_level > 0) printf(")");
+void DeclAST::print(int level) {
+    indent(level);
+    printf("%s ", &type.lexeme[0]);
+    (*decl)[0]->print(level);
+    for (size_t i = 1; i < decl->size(); i++) {
+        printf(", ");
+        (*decl)[i]->print(level);
+    }
+    printf(";\n");
+}
+
+void ParamDeclAST::print(int level) {
+    indent(level);
+    printf("%s", &type.lexeme[0]);
+    if (decl) {
+        printf(" ");
+        decl->print(level);
+    }
 }
 
 void VarDecl::print(int, bool) {

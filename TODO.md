@@ -10,9 +10,8 @@ Unimplemented syntax:
     2. Type specifier: `struct`, `union`, `enum`, `typedef_name`, combination
        of basic types (e.g., `unsigned char`)
     3. Type qualifier: `const`, `volatile`
-    4. Multiple declaration in single "statement": `int a, b, c, ...`
-    5. Initializer in declaration: `int a = 1`
-    6. Abstract declarator: `int f(int *, char)`
+    4. Compound initializer: `int a[] = { ... }`
+    5. Abstract declarator: `int f(int *, char)`
 - Expression
     1. Comma operator
     2. Compound assignment operators

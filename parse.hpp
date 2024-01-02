@@ -6,14 +6,16 @@
 #include <vector>
 class ExprAST;
 class StmtAST;
+class ExtDeclAST;
 class DeclAST;
+class ParamDeclAST;
 class Declarator;
 class DirectDecl;
 
 class Parser {
 public:
     Parser(Scanner &scanner) : scanner(scanner) { advance(); }
-    std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> parse_trans_unit();
+    std::unique_ptr<std::vector<std::unique_ptr<ExtDeclAST>>> parse_trans_unit();
 private:
     Scanner &scanner;
     Token prev;
@@ -28,8 +30,10 @@ private:
     }
 
     Token parse_type_spec();
-    std::unique_ptr<DeclAST> parse_external_decl();
-    std::unique_ptr<DeclAST> parse_param_decl();
+    std::unique_ptr<ExtDeclAST> parse_external_decl();
+    std::unique_ptr<DeclAST> parse_data_decl(
+            Token type, std::unique_ptr<Declarator>);
+    std::unique_ptr<ParamDeclAST> parse_param_decl();
     std::unique_ptr<Declarator> parse_declarator();
     std::unique_ptr<DirectDecl> parse_direct_declarator();
     std::unique_ptr<DirectDecl> parse_array_decl(std::unique_ptr<DirectDecl>);

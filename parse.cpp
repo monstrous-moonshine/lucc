@@ -38,10 +38,10 @@ Token Parser::parse_type_spec() {
     }
 }
 
-std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>>
+std::unique_ptr<std::vector<std::unique_ptr<ExtDeclAST>>>
 Parser::parse_trans_unit() {
-    std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> decls(
-            new std::vector<std::unique_ptr<DeclAST>>);
+    std::unique_ptr<std::vector<std::unique_ptr<ExtDeclAST>>> decls(
+            new std::vector<std::unique_ptr<ExtDeclAST>>);
     while (prev.type != TOK_EOF) {
         auto decl = parse_external_decl();
         if (!decl) return NULL;
@@ -50,7 +50,7 @@ Parser::parse_trans_unit() {
     return decls;
 }
 
-std::unique_ptr<DeclAST> Parser::parse_external_decl() {
+std::unique_ptr<ExtDeclAST> Parser::parse_external_decl() {
     Token type = parse_type_spec();
     if (type.type == TOK_ERR) {
         fprintf(stderr, "Expect type specifier\n");
@@ -58,30 +58,53 @@ std::unique_ptr<DeclAST> Parser::parse_external_decl() {
     }
     auto decl = parse_declarator();
     if (!decl) return NULL;
-    if (match(TOK_SEMICOLON)) {
-        return std::make_unique<DeclAST>(false, type, std::move(decl), nullptr);
-    } else if (match(TOK_LBRACE)) {
+    if (match(TOK_LBRACE)) {
         auto body = block_stmt();
         if (!body) return NULL;
-        return std::make_unique<DeclAST>(false, type, std::move(decl),
-                                         std::move(body));
+        return std::make_unique<FuncDeclAST>(type, std::move(decl),
+                                             std::move(body));
     } else {
-        fprintf(stderr, "Expect ';' or '{'\n");
-        return NULL;
+        return parse_data_decl(type, std::move(decl));
     }
 }
 
-std::unique_ptr<DeclAST> Parser::parse_param_decl() {
+std::unique_ptr<DeclAST> Parser::parse_data_decl(
+        Token type, std::unique_ptr<Declarator> decl) {
+    std::unique_ptr<std::vector<std::unique_ptr<InitDecl>>> init_decls(
+            new std::vector<std::unique_ptr<InitDecl>>);
+    for (;;) {
+        std::unique_ptr<ExprAST> init;
+        if (match(TOK_ASSIGN)) {
+            init = parse_expr(1);
+            if (!init) return NULL;
+        }
+        auto init_decl = std::make_unique<InitDecl>(std::move(decl),
+                                                    std::move(init));
+        init_decls->emplace_back(std::move(init_decl));
+        if (match(TOK_COMMA)) {
+            decl = parse_declarator();
+            if (!decl) return NULL;
+        } else if (match(TOK_SEMICOLON)) {
+            break;
+        } else {
+            fprintf(stderr, "Expect ',' or ';'\n");
+            return NULL;
+        }
+    }
+    return std::make_unique<DeclAST>(type, std::move(init_decls));
+}
+
+std::unique_ptr<ParamDeclAST> Parser::parse_param_decl() {
     Token type = parse_type_spec();
     if (type.type == TOK_ERR) {
         fprintf(stderr, "Expect type specifier\n");
         return NULL;
     }
     if (prev.type == TOK_COMMA || prev.type == TOK_RPAREN)
-        return std::make_unique<DeclAST>(true, type, nullptr, nullptr);
+        return std::make_unique<ParamDeclAST>(type, nullptr);
     auto decl = parse_declarator();
     if (!decl) return NULL;
-    return std::make_unique<DeclAST>(true, type, std::move(decl), nullptr);
+    return std::make_unique<ParamDeclAST>(type, std::move(decl));
 }
 
 std::unique_ptr<Declarator> Parser::parse_declarator() {
@@ -130,13 +153,14 @@ std::unique_ptr<DirectDecl> Parser::parse_array_decl(std::unique_ptr<DirectDecl>
     }
 }
 
-std::unique_ptr<DirectDecl> Parser::parse_func_decl(std::unique_ptr<DirectDecl> decl) {
+std::unique_ptr<DirectDecl> Parser::parse_func_decl(
+        std::unique_ptr<DirectDecl> decl) {
     if (match(TOK_RPAREN)) {
         return std::make_unique<FuncDecl>(false, std::move(decl), nullptr);
     } else {
         bool is_variadic = false;
-        std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> params(
-                new std::vector<std::unique_ptr<DeclAST>>);
+        std::unique_ptr<std::vector<std::unique_ptr<ParamDeclAST>>> params(
+                new std::vector<std::unique_ptr<ParamDeclAST>>);
         auto param_decl = parse_param_decl();
         if (!param_decl) return NULL;
         params->emplace_back(std::move(param_decl));
@@ -216,9 +240,8 @@ std::unique_ptr<StmtAST> Parser::block_stmt() {
         if (type.type == TOK_ERR) break;
         auto decl = parse_declarator();
         if (!decl) return NULL;
-        consume(TOK_SEMICOLON, "Expect ';'\n");
-        auto decl_ast = std::make_unique<DeclAST>(false, type, std::move(decl),
-                                                  nullptr);
+        auto decl_ast = parse_data_decl(type, std::move(decl));
+        if (!decl_ast) return NULL;
         decls->emplace_back(std::move(decl_ast));
     }
     while (prev.type != TOK_RBRACE) {

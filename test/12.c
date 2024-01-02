@@ -1,6 +1,6 @@
 int printf(char *s, ...);
 int main() {
-    int i;
+    int i = 0;
     switch (i)
     begin:
         if (i < 10) {
