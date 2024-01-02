@@ -44,11 +44,13 @@ public:
 };
 
 class CallExprAST : public ExprAST {
-    std::unique_ptr<ExprAST> func;
-    std::unique_ptr<std::vector<std::unique_ptr<ExprAST>>> args;
 public:
-    CallExprAST(std::unique_ptr<ExprAST> func,
-                std::unique_ptr<std::vector<std::unique_ptr<ExprAST>>> args)
+    using ArgList = std::vector<std::unique_ptr<ExprAST>>;
+private:
+    std::unique_ptr<ExprAST> func;
+    std::unique_ptr<ArgList> args;
+public:
+    CallExprAST(std::unique_ptr<ExprAST> func, std::unique_ptr<ArgList> args)
         : func(std::move(func)), args(std::move(args)) {}
     void print() override;
 };

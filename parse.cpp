@@ -417,8 +417,7 @@ std::unique_ptr<ExprAST> Parser::call(std::unique_ptr<ExprAST> e) {
     if (match(TOK_RPAREN)) {
         return std::make_unique<CallExprAST>(std::move(e), nullptr);
     }
-    std::unique_ptr<std::vector<std::unique_ptr<ExprAST>>> args(
-            new std::vector<std::unique_ptr<ExprAST>>);
+    auto args = std::make_unique<CallExprAST::ArgList>();
     auto a = parse_expr(1);  // PREC_COMMA
     if (!a) return NULL;
     args->emplace_back(std::move(a));
