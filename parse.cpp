@@ -84,14 +84,14 @@ std::unique_ptr<DeclAST> Parser::parse_param_decl() {
     return std::make_unique<DeclAST>(true, type, std::move(decl), nullptr);
 }
 
-std::unique_ptr<Decl> Parser::parse_declarator() {
+std::unique_ptr<Declarator> Parser::parse_declarator() {
     int ptr_level = 0;
     while (match(TOK_STAR)) {
         ptr_level++;
     }
     auto decl = parse_direct_declarator();
     if (!decl) return NULL;
-    return std::make_unique<Decl>(ptr_level, std::move(decl));
+    return std::make_unique<Declarator>(ptr_level, std::move(decl));
 }
 
 std::unique_ptr<DirectDecl> Parser::parse_direct_declarator() {

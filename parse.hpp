@@ -7,7 +7,7 @@
 class ExprAST;
 class StmtAST;
 class DeclAST;
-class Decl;
+class Declarator;
 class DirectDecl;
 
 class Parser {
@@ -30,7 +30,7 @@ private:
     Token parse_type_spec();
     std::unique_ptr<DeclAST> parse_external_decl();
     std::unique_ptr<DeclAST> parse_param_decl();
-    std::unique_ptr<Decl> parse_declarator();
+    std::unique_ptr<Declarator> parse_declarator();
     std::unique_ptr<DirectDecl> parse_direct_declarator();
     std::unique_ptr<DirectDecl> parse_array_decl(std::unique_ptr<DirectDecl>);
     std::unique_ptr<DirectDecl> parse_func_decl(std::unique_ptr<DirectDecl>);

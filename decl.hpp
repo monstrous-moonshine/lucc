@@ -6,7 +6,7 @@
 #include <string>
 #include <utility>
 #include <vector>
-class Decl;
+class Declarator;
 class StmtAST;
 
 class DeclAST {
@@ -27,11 +27,11 @@ class DeclAST {
     //
     bool is_param;
     Token type;
-    std::unique_ptr<Decl> decl;
+    std::unique_ptr<Declarator> decl;
     std::unique_ptr<StmtAST> body;
 public:
     DeclAST(bool is_param, Token type,
-            std::unique_ptr<Decl> decl,
+            std::unique_ptr<Declarator> decl,
             std::unique_ptr<StmtAST> body);
     void print(int level);
 };
@@ -42,12 +42,12 @@ public:
     virtual void print(int level, bool) = 0;
 };
 
-class Decl : public DirectDecl {
+class Declarator : public DirectDecl {
     int ptr_level;
     std::unique_ptr<DirectDecl> decl;
     void print(int level, bool paren_if_ptr) override;
 public:
-    Decl(int ptr_level, std::unique_ptr<DirectDecl> decl)
+    Declarator(int ptr_level, std::unique_ptr<DirectDecl> decl)
         : ptr_level(ptr_level), decl(std::move(decl)) {}
     void print(int level) { print(level, false); }
 };

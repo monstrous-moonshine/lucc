@@ -3,7 +3,7 @@
 #include <cstdio>
 
 DeclAST::DeclAST(bool is_param, Token type,
-                 std::unique_ptr<Decl> decl,
+                 std::unique_ptr<Declarator> decl,
                  std::unique_ptr<StmtAST> body)
     : is_param(is_param), type(type), decl(std::move(decl))
     , body(std::move(body)) {}
@@ -23,7 +23,7 @@ void DeclAST::print(int level) {
     }
 }
 
-void Decl::print(int level, bool paren_if_ptr) {
+void Declarator::print(int level, bool paren_if_ptr) {
     if (paren_if_ptr && ptr_level > 0) printf("(");
     for (int i = 0; i < ptr_level; i++) fputc('*', stdout);
     decl->print(level, false);
