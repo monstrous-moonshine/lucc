@@ -57,6 +57,7 @@ private:
     std::unique_ptr<StmtAST> for_stmt();
     std::unique_ptr<StmtAST> while_stmt();
     std::unique_ptr<StmtAST> do_stmt();
+    std::unique_ptr<StmtAST> goto_stmt();
     std::unique_ptr<StmtAST> continue_stmt();
     std::unique_ptr<StmtAST> break_stmt();
     std::unique_ptr<StmtAST> return_stmt();
@@ -123,7 +124,7 @@ private:
         &Parser::for_stmt,
         &Parser::while_stmt,
         &Parser::do_stmt,
-        NULL,  // goto
+        &Parser::goto_stmt,
         &Parser::continue_stmt,
         &Parser::break_stmt,
         &Parser::return_stmt,

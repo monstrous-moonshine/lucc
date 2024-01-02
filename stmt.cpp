@@ -101,9 +101,7 @@ void JumpStmtAST::print(int level) {
     indent(level);
     switch (type) {
     case GOTO:
-        printf("goto ");
-        label->print();
-        printf("\n");
+        printf("goto %s;\n", &label[0]);
         break;
     case CONTINUE:
         printf("continue;\n");

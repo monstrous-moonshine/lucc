@@ -304,14 +304,22 @@ std::unique_ptr<StmtAST> Parser::do_stmt() {
     return std::make_unique<DoStmtAST>(std::move(cond), std::move(body));
 }
 
+std::unique_ptr<StmtAST> Parser::goto_stmt() {
+    Token label = prev;
+    advance();
+    consume(TOK_SEMICOLON, "Expect ';'\n");
+    return std::make_unique<JumpStmtAST>(JumpStmtAST::GOTO,
+                                         std::move(label.lexeme));
+}
+
 std::unique_ptr<StmtAST> Parser::continue_stmt() {
     consume(TOK_SEMICOLON, "Expect ';'\n");
-    return std::make_unique<JumpStmtAST>(JumpStmtAST::CONTINUE, nullptr);
+    return std::make_unique<JumpStmtAST>(JumpStmtAST::CONTINUE, "");
 }
 
 std::unique_ptr<StmtAST> Parser::break_stmt() {
     consume(TOK_SEMICOLON, "Expect ';'\n");
-    return std::make_unique<JumpStmtAST>(JumpStmtAST::BREAK, nullptr);
+    return std::make_unique<JumpStmtAST>(JumpStmtAST::BREAK, "");
 }
 
 std::unique_ptr<StmtAST> Parser::return_stmt() {

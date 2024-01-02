@@ -118,10 +118,10 @@ public:
     };
 private:
     JumpType type;
-    std::unique_ptr<ExprAST> label;
+    std::string label;
 public:
-    JumpStmtAST(JumpType type, std::unique_ptr<ExprAST> label)
-        : type(type), label(std::move(label)) {}
+    JumpStmtAST(JumpType type, std::string &&label)
+        : type(type), label(label) {}
     void print(int level) override;
 };
 
