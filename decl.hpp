@@ -45,7 +45,7 @@ public:
 class Decl : public DirectDecl {
     int ptr_level;
     std::unique_ptr<DirectDecl> decl;
-    void print(int level, bool maybe_paren) override;
+    void print(int level, bool paren_if_ptr) override;
 public:
     Decl(int ptr_level, std::unique_ptr<DirectDecl> decl)
         : ptr_level(ptr_level), decl(std::move(decl)) {}

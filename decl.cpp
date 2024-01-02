@@ -23,11 +23,11 @@ void DeclAST::print(int level) {
     }
 }
 
-void Decl::print(int level, bool maybe_paren) {
-    if (maybe_paren && ptr_level > 0) printf("(");
+void Decl::print(int level, bool paren_if_ptr) {
+    if (paren_if_ptr && ptr_level > 0) printf("(");
     for (int i = 0; i < ptr_level; i++) fputc('*', stdout);
     decl->print(level, false);
-    if (maybe_paren && ptr_level > 0) printf(")");
+    if (paren_if_ptr && ptr_level > 0) printf(")");
 }
 
 void VarDecl::print(int, bool) {
