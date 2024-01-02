@@ -13,9 +13,6 @@ Unimplemented syntax:
     4. Multiple declaration in single "statement": `int a, b, c, ...`
     5. Initializer in declaration: `int a = 1`
     6. Abstract declarator: `int f(int *, char)`
-- Statements
-    1. Labeled statement: `label: stmt`
-    2. Jump statement: `goto`
 - Expression
     1. Comma operator
     2. Compound assignment operators
