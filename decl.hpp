@@ -2,7 +2,6 @@
 #define DECL_HPP
 #include "expr.hpp"
 #include "scan.hpp"
-#include <algorithm>
 #include <memory>
 #include <string>
 #include <utility>

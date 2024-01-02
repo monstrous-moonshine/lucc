@@ -3,6 +3,7 @@
 #include "decl.hpp"
 #include "expr.hpp"
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
