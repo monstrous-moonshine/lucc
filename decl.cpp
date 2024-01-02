@@ -14,17 +14,18 @@ void indent(int level) {
 void Declarator::print(int level, bool has_postfix) {
     if (has_postfix && ptr_level > 0) printf("(");
     for (int i = 0; i < ptr_level; i++) fputc('*', stdout);
+    // We are not a function or array declaration, so pass false here
     decl->print(level, false);
     if (has_postfix && ptr_level > 0) printf(")");
 }
 
 FuncDeclAST::FuncDeclAST(Token type, std::unique_ptr<Declarator> decl,
                          std::unique_ptr<StmtAST> body)
-    : type(type), decl(std::move(decl)), body(std::move(body)) {}
+    : ExtDeclAST(type), decl(std::move(decl)), body(std::move(body)) {}
 
 void FuncDeclAST::print(int level) {
     indent(level);
-    printf("%s ", &type.lexeme[0]);
+    printf("%s ", &get_type().lexeme[0]);
     decl->print(level);
     printf("\n");
     body->print(level);
@@ -40,7 +41,7 @@ void InitDecl::print(int level) {
 
 void DeclAST::print(int level) {
     indent(level);
-    printf("%s ", &type.lexeme[0]);
+    printf("%s ", &get_type().lexeme[0]);
     (*decl)[0].print(level);
     for (size_t i = 1; i < decl->size(); i++) {
         printf(", ");
@@ -51,7 +52,7 @@ void DeclAST::print(int level) {
 
 void ParamDeclAST::print(int level) {
     indent(level);
-    printf("%s", &type.lexeme[0]);
+    printf("%s", &get_type().lexeme[0]);
     if (decl) {
         printf(" ");
         decl->print(level);

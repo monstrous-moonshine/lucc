@@ -18,10 +18,11 @@ class StmtAST;
 class DirectDecl {
 public:
     virtual ~DirectDecl() = default;
-    // @has_postfix is true if it's the "stem" of a function or array decla-
-    // ration. In that case, the base declaration has to be parenthesized if
-    // it's a pointer, since otherwise the function or array declaration would
-    // bind more tightly than the pointer declaration.
+    // @has_postfix is passed true if we are the base of a function or array
+    // declaration. In that case, the base declaration has to be parenthesized
+    // if it's a pointer, since otherwise the function or array declaration
+    // would bind more tightly than the pointer declaration. Note that only
+    // Declarator cares about this since it potentially has some indirection.
     virtual void print(int level, bool has_postfix) = 0;
 };
 
@@ -44,14 +45,22 @@ public:
     void print(int level) { print(level, false); }
 };
 
-class ExtDeclAST {
+class DeclASTBase {
+    Token type;
 public:
-    virtual ~ExtDeclAST() = default;
+    DeclASTBase(Token type) : type(type) {}
+    virtual ~DeclASTBase() = default;
     virtual void print(int level) = 0;
+    Token get_type() { return type; }
+};
+
+class ExtDeclAST : public DeclASTBase {
+public:
+    ExtDeclAST(Token type) : DeclASTBase(type) {}
+    virtual ~ExtDeclAST() = default;
 };
 
 class FuncDeclAST : public ExtDeclAST {
-    Token type;
     std::unique_ptr<Declarator> decl;
     std::unique_ptr<StmtAST> body;
 public:
@@ -70,21 +79,19 @@ public:
 };
 
 class DeclAST : public ExtDeclAST {
-    Token type;
     std::unique_ptr<std::vector<InitDecl>> decl;
 public:
     DeclAST(Token type, std::unique_ptr<std::vector<InitDecl>> decl)
-        : type(type), decl(std::move(decl)) {}
+        : ExtDeclAST(type), decl(std::move(decl)) {}
     void print(int level) override;
 };
 
-class ParamDeclAST {
-    Token type;
+class ParamDeclAST : public DeclASTBase {
     std::unique_ptr<Declarator> decl;
 public:
     ParamDeclAST(Token type, std::unique_ptr<Declarator> decl)
-        : type(type), decl(std::move(decl)) {}
-    void print(int level);
+        : DeclASTBase(type), decl(std::move(decl)) {}
+    void print(int level) override;
 };
 
 class VarDecl : public DirectDecl {
