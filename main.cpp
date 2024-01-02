@@ -13,14 +13,14 @@
 namespace
 {
 
-std::string read_file(const char *name) {
+std::unique_ptr<std::string> read_file(const char *name) {
     std::ifstream file(name);
     if (file.is_open()) {
-        std::stringstream buf;
+        std::ostringstream buf;
         buf << file.rdbuf();
-        return buf.str();
+        return std::make_unique<std::string>(std::move(*buf.rdbuf()).str());
     } else {
-        return "";
+        return NULL;
     }
 }
 
@@ -32,8 +32,12 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
     auto src = read_file(argv[1]);
-    Scanner scanner(src.c_str());
-    Parser  parser(scanner);
+    if (!src) {
+        fprintf(stderr, "mycc: %s: No such file or directory\n", argv[1]);
+        exit(1);
+    }
+    Scanner scanner(src->c_str());
+    Parser parser(scanner);
 #if 0
     for (;;) {
         auto token = scanner.scan();
