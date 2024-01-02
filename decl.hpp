@@ -9,6 +9,12 @@
 #include <vector>
 class StmtAST;
 
+// A function declaration contains a block statement, and a block statement in
+// turn contains declarations, so there's a circular dependency here. We deal
+// with it by only keeping a forward declaration of StmtAST here, and putting
+// the implementation of statement related functions into the cpp file. In the
+// statements header file, we include this header normally.
+
 class DirectDecl {
 public:
     virtual ~DirectDecl() = default;
