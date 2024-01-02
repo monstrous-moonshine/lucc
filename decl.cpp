@@ -51,7 +51,6 @@ void DeclAST::print(int level) {
 }
 
 void ParamDeclAST::print(int level) {
-    indent(level);
     printf("%s", &get_type().lexeme[0]);
     if (decl) {
         printf(" ");
@@ -73,11 +72,11 @@ void ArrayDecl::print(int level, bool) {
 
 void FuncDecl::print(int level, bool) {
     name->print(level, true);
-    printf("(\n");
+    printf("(");
     if (params) {
         (*params)[0].print(level + 2);
         for (size_t i = 1; i < params->size(); i++) {
-            printf(",\n");
+            printf(", ");
             (*params)[i].print(level + 2);
         }
     }
