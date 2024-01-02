@@ -70,17 +70,15 @@ std::unique_ptr<ExtDeclAST> Parser::parse_external_decl() {
 
 std::unique_ptr<DeclAST> Parser::parse_data_decl(
         Token type, std::unique_ptr<Declarator> decl) {
-    std::unique_ptr<std::vector<std::unique_ptr<InitDecl>>> init_decls(
-            new std::vector<std::unique_ptr<InitDecl>>);
+    std::unique_ptr<std::vector<InitDecl>> init_decls(
+            new std::vector<InitDecl>);
     for (;;) {
         std::unique_ptr<ExprAST> init;
         if (match(TOK_ASSIGN)) {
             init = parse_expr(1);
             if (!init) return NULL;
         }
-        auto init_decl = std::make_unique<InitDecl>(std::move(decl),
-                                                    std::move(init));
-        init_decls->emplace_back(std::move(init_decl));
+        init_decls->emplace_back(std::move(decl), std::move(init));
         if (match(TOK_COMMA)) {
             decl = parse_declarator();
             if (!decl) return NULL;
@@ -159,11 +157,11 @@ std::unique_ptr<DirectDecl> Parser::parse_func_decl(
         return std::make_unique<FuncDecl>(false, std::move(decl), nullptr);
     } else {
         bool is_variadic = false;
-        std::unique_ptr<std::vector<std::unique_ptr<ParamDeclAST>>> params(
-                new std::vector<std::unique_ptr<ParamDeclAST>>);
+        std::unique_ptr<std::vector<ParamDeclAST>> params(
+                new std::vector<ParamDeclAST>);
         auto param_decl = parse_param_decl();
         if (!param_decl) return NULL;
-        params->emplace_back(std::move(param_decl));
+        params->push_back(std::move(*param_decl.release()));
         while (match(TOK_COMMA)) {
             if (match(TOK_ELLIPSIS)) {
                 is_variadic = true;
@@ -171,7 +169,7 @@ std::unique_ptr<DirectDecl> Parser::parse_func_decl(
             }
             auto param_decl = parse_param_decl();
             if (!param_decl) return NULL;
-            params->emplace_back(std::move(param_decl));
+            params->push_back(std::move(*param_decl.release()));
         }
         consume(TOK_RPAREN, "Expect ')'\n");
         return std::make_unique<FuncDecl>(is_variadic, std::move(decl),

@@ -41,10 +41,10 @@ void InitDecl::print(int level) {
 void DeclAST::print(int level) {
     indent(level);
     printf("%s ", &type.lexeme[0]);
-    (*decl)[0]->print(level);
+    (*decl)[0].print(level);
     for (size_t i = 1; i < decl->size(); i++) {
         printf(", ");
-        (*decl)[i]->print(level);
+        (*decl)[i].print(level);
     }
     printf(";\n");
 }
@@ -74,10 +74,10 @@ void FuncDecl::print(int level, bool) {
     name->print(level, true);
     printf("(\n");
     if (params) {
-        (*params)[0]->print(level + 2);
+        (*params)[0].print(level + 2);
         for (size_t i = 1; i < params->size(); i++) {
             printf(",\n");
-            (*params)[i]->print(level + 2);
+            (*params)[i].print(level + 2);
         }
     }
     if (is_variadic)

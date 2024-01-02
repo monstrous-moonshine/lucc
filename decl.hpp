@@ -12,11 +12,10 @@ class StmtAST;
 class DirectDecl {
 public:
     virtual ~DirectDecl() = default;
-    // @has_postfix is true if it's the "stem" of a function or
-    // array declaration. In that case, the base declaration has
-    // to be parenthesized if it's a pointer, since otherwise the
-    // function or array declaration would bind more tightly than
-    // the pointer declaration.
+    // @has_postfix is true if it's the "stem" of a function or array decla-
+    // ration. In that case, the base declaration has to be parenthesized if
+    // it's a pointer, since otherwise the function or array declaration would
+    // bind more tightly than the pointer declaration.
     virtual void print(int level, bool has_postfix) = 0;
 };
 
@@ -66,10 +65,9 @@ public:
 
 class DeclAST : public ExtDeclAST {
     Token type;
-    std::unique_ptr<std::vector<std::unique_ptr<InitDecl>>> decl;
+    std::unique_ptr<std::vector<InitDecl>> decl;
 public:
-    DeclAST(Token type,
-            std::unique_ptr<std::vector<std::unique_ptr<InitDecl>>> decl)
+    DeclAST(Token type, std::unique_ptr<std::vector<InitDecl>> decl)
         : type(type), decl(std::move(decl)) {}
     void print(int level) override;
 };
@@ -102,11 +100,11 @@ public:
 class FuncDecl : public DirectDecl {
     bool is_variadic;
     std::unique_ptr<DirectDecl> name;
-    std::unique_ptr<std::vector<std::unique_ptr<ParamDeclAST>>> params;
+    std::unique_ptr<std::vector<ParamDeclAST>> params;
     void print(int level, bool) override;
 public:
     FuncDecl(bool is_variadic, std::unique_ptr<DirectDecl> name,
-             std::unique_ptr<std::vector<std::unique_ptr<ParamDeclAST>>> params)
+             std::unique_ptr<std::vector<ParamDeclAST>> params)
         : is_variadic(is_variadic), name(std::move(name))
         , params(std::move(params)) {}
 };
