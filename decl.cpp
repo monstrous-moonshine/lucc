@@ -74,10 +74,10 @@ void FuncDecl::print(int level, bool) {
     name->print(level, true);
     printf("(");
     if (params) {
-        (*params)[0].print(level + 2);
+        (*params)[0]->print(level + 2);
         for (size_t i = 1; i < params->size(); i++) {
             printf(", ");
-            (*params)[i].print(level + 2);
+            (*params)[i]->print(level + 2);
         }
     }
     if (is_variadic)
