@@ -22,6 +22,10 @@ public:
     // if it's a pointer, since otherwise the function or array declaration
     // would bind more tightly than the pointer declaration. Note that only
     // Declarator cares about this since it potentially has some indirection.
+    //
+    // This function needs to be public in the base class (this one), but it
+    // can be private in the subclasses since it's only ever called through
+    // the base class.
     virtual void print(int level, bool has_postfix) = 0;
 };
 
@@ -40,7 +44,9 @@ class Declarator : public DirectDecl {
 public:
     Declarator(int ptr_level, std::unique_ptr<DirectDecl> decl)
         : ptr_level(ptr_level), decl(std::move(decl)) {}
-    // The top level declarator is not a direct_declarator, so pass false here
+    // The top level declarator is not a direct_declarator, so pass false here.
+    // We need this public interface here since the *DeclAST classes contain
+    // one or more declarators and they want to print them.
     void print(int level) { print(level, false); }
 };
 
