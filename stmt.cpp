@@ -14,8 +14,7 @@ void LabelStmtAST::print(int level) {
     indent(level - 2);
     switch (type) {
     case LABEL:
-        label->print();
-        printf(":\n");
+        printf("%s:\n", &label[0]);
         break;
     case CASE:
         printf("case ");

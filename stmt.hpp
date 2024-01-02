@@ -21,14 +21,14 @@ public:
     };
 private:
     LabelType type;
-    std::unique_ptr<ExprAST> label;
+    std::string label;
     std::unique_ptr<ExprAST> case_exp;
     std::unique_ptr<StmtAST> stmt;
 public:
-    LabelStmtAST(LabelType type, std::unique_ptr<ExprAST> label,
+    LabelStmtAST(LabelType type, std::string &&label,
                  std::unique_ptr<ExprAST> case_exp,
                  std::unique_ptr<StmtAST> stmt)
-        : type(type), label(std::move(label))
+        : type(type), label(label)
         , case_exp(std::move(case_exp)), stmt(std::move(stmt)) {}
     void print(int level) override;
 };

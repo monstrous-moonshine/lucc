@@ -158,6 +158,7 @@ std::unique_ptr<DirectDecl> Parser::parse_func_decl(std::unique_ptr<DirectDecl> 
 std::unique_ptr<StmtAST> Parser::parse_stmt() {
     StmtParser parser = get_stmt_parser(prev.type);
     if (!parser) {
+        if (prev.type == TOK_IDENT) return label_stmt();
         auto e = parse_expr(0);
         if (!e) return NULL;
         consume(TOK_SEMICOLON, "Expect ';'\n");
@@ -168,19 +169,40 @@ std::unique_ptr<StmtAST> Parser::parse_stmt() {
     }
 }
 
+std::unique_ptr<StmtAST> Parser::label_stmt() {
+    Token label = prev;
+    advance();
+    if (match(TOK_COLON)) {
+        auto stmt = parse_stmt();
+        if (!stmt) return NULL;
+        return std::make_unique<LabelStmtAST>(LabelStmtAST::LABEL,
+                std::move(label.lexeme), nullptr, std::move(stmt));
+    } else {
+        std::unique_ptr<ExprAST> e = std::make_unique<VarExprAST>(
+                std::move(label.lexeme));
+        while (0 < get_expr_precedence()) {
+            auto infix_fn = get_expr_rule(prev.type)->infix;
+            e = std::invoke(infix_fn, *this, std::move(e));
+            if (!e) return NULL;
+        }
+        consume(TOK_SEMICOLON, "Expect ';'\n");
+        return std::make_unique<ExprStmtAST>(std::move(e));
+    }
+}
+
 std::unique_ptr<StmtAST> Parser::case_stmt() {
     auto e = parse_expr(2);
     if (!e) return NULL;
     consume(TOK_COLON, "Expect ':'\n");
     auto stmt = parse_stmt();
-    return std::make_unique<LabelStmtAST>(LabelStmtAST::CASE, nullptr,
+    return std::make_unique<LabelStmtAST>(LabelStmtAST::CASE, "",
                                           std::move(e), std::move(stmt));
 }
 
 std::unique_ptr<StmtAST> Parser::default_stmt() {
     consume(TOK_COLON, "Expect ':'\n");
     auto stmt = parse_stmt();
-    return std::make_unique<LabelStmtAST>(LabelStmtAST::DEFAULT, nullptr,
+    return std::make_unique<LabelStmtAST>(LabelStmtAST::DEFAULT, "",
                                           nullptr, std::move(stmt));
 }
 

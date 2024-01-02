@@ -48,6 +48,7 @@ private:
     std::unique_ptr<ExprAST> ternary(std::unique_ptr<ExprAST>);
     std::unique_ptr<ExprAST> postfix(std::unique_ptr<ExprAST>);
 
+    std::unique_ptr<StmtAST> label_stmt();
     std::unique_ptr<StmtAST> case_stmt();
     std::unique_ptr<StmtAST> default_stmt();
     std::unique_ptr<StmtAST> block_stmt();
