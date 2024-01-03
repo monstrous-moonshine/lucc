@@ -42,6 +42,7 @@ private:
     std::unique_ptr<DirectDecl> parse_func_decl(std::unique_ptr<DirectDecl>);
     std::unique_ptr<StmtAST> parse_stmt();
     std::unique_ptr<ExprAST> parse_expr(int prec);
+    std::unique_ptr<ExprAST> parse_infix(int prec, std::unique_ptr<ExprAST>);
 
     std::unique_ptr<ExprAST> variable();
     std::unique_ptr<ExprAST> number();

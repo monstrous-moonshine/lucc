@@ -138,7 +138,8 @@ std::unique_ptr<DirectDecl> Parser::parse_direct_declarator() {
     return decl;
 }
 
-std::unique_ptr<DirectDecl> Parser::parse_array_decl(std::unique_ptr<DirectDecl> decl) {
+std::unique_ptr<DirectDecl> Parser::parse_array_decl(
+        std::unique_ptr<DirectDecl> decl) {
     if (match(TOK_RBRACKET)) {
         return std::make_unique<ArrayDecl>(std::move(decl), nullptr);
     } else {
@@ -197,13 +198,8 @@ std::unique_ptr<StmtAST> Parser::label_stmt() {
         return std::make_unique<LabelStmtAST>(LabelStmtAST::LABEL,
                 std::move(label), nullptr, std::move(stmt));
     } else {
-        std::unique_ptr<ExprAST> e = std::make_unique<VarExprAST>(
-                std::move(label));
-        while (0 < get_expr_precedence()) {
-            auto infix_fn = get_expr_rule(prev.type)->infix;
-            e = std::invoke(infix_fn, *this, std::move(e));
-            if (!e) return NULL;
-        }
+        auto e = parse_infix(0, std::make_unique<VarExprAST>(std::move(label)));
+        if (!e) return NULL;
         consume(TOK_SEMICOLON, "Expect ';'\n");
         return std::make_unique<ExprStmtAST>(std::move(e));
     }
@@ -214,6 +210,7 @@ std::unique_ptr<StmtAST> Parser::case_stmt() {
     if (!e) return NULL;
     consume(TOK_COLON, "Expect ':'\n");
     auto stmt = parse_stmt();
+    if (!stmt) return NULL;
     return std::make_unique<LabelStmtAST>(LabelStmtAST::CASE, nullptr,
                                           std::move(e), std::move(stmt));
 }
@@ -221,6 +218,7 @@ std::unique_ptr<StmtAST> Parser::case_stmt() {
 std::unique_ptr<StmtAST> Parser::default_stmt() {
     consume(TOK_COLON, "Expect ':'\n");
     auto stmt = parse_stmt();
+    if (!stmt) return NULL;
     return std::make_unique<LabelStmtAST>(LabelStmtAST::DEFAULT, nullptr,
                                           nullptr, std::move(stmt));
 }
@@ -321,6 +319,10 @@ std::unique_ptr<StmtAST> Parser::do_stmt() {
 }
 
 std::unique_ptr<StmtAST> Parser::goto_stmt() {
+    if (prev.type != TOK_IDENT) {
+        fprintf(stderr, "Expect identifier\n");
+        return NULL;
+    }
     auto label = std::make_unique<std::string>(prev.lexeme);
     advance();
     consume(TOK_SEMICOLON, "Expect ';'\n");
@@ -366,6 +368,11 @@ std::unique_ptr<ExprAST> Parser::parse_expr(int prec) {
     auto e = std::invoke(prefix_fn, *this);
     if (!e) return NULL;
 
+    return parse_infix(prec, std::move(e));
+}
+
+std::unique_ptr<ExprAST> Parser::parse_infix(
+        int prec, std::unique_ptr<ExprAST> e) {
     while (prec < get_expr_precedence()) {
         auto infix_fn = get_expr_rule(prev.type)->infix;
         e = std::invoke(infix_fn, *this, std::move(e));
@@ -414,11 +421,11 @@ std::unique_ptr<ExprAST> Parser::call(std::unique_ptr<ExprAST> e) {
         return std::make_unique<CallExprAST>(std::move(e), nullptr);
     }
     auto args = std::make_unique<CallExprAST::ArgList>();
-    auto a = parse_expr(1);  // PREC_COMMA
+    auto a = parse_expr(1);  // until ','
     if (!a) return NULL;
     args->emplace_back(std::move(a));
     while (match(TOK_COMMA)) {
-        auto a = parse_expr(1);  // PREC_COMMA
+        auto a = parse_expr(1);  // until ','
         if (!a) return NULL;
         args->emplace_back(std::move(a));
     }
@@ -429,21 +436,21 @@ std::unique_ptr<ExprAST> Parser::call(std::unique_ptr<ExprAST> e) {
 std::unique_ptr<ExprAST> Parser::unary() {
     Token token = prev;
     advance();
-    auto e = parse_expr(13);
+    auto e = parse_expr(13);  // until '*', '/' or '%'
     if (!e) return NULL;
     return std::make_unique<UnaryExprAST>(false, token, std::move(e));
 }
 
 std::unique_ptr<ExprAST> Parser::binary(std::unique_ptr<ExprAST> e) {
-    /* NOTE:
-     * 1. Assignment is right associative.
-     * 2. LHS of assignment must be unary expression.
-     *
-     * We handle point 1 by passing in a lower minimum precedence for the RHS
-     * when parsing an assignment. This will ensure that an assignment operator
-     * to the right of the current one will be parsed as part of the RHS. We
-     * will check for point 2 in the semantic analysis phase.
-     */
+    // NOTE:
+    // 1. Assignment is right associative.
+    // 2. LHS of assignment must be unary expression.
+    //
+    // We handle point 1 by passing in a lower minimum precedence for the RHS
+    // when parsing an assignment. This will ensure that an assignment operator
+    // to the right of the current one will be parsed as part of the RHS. We
+    // will check for point 2 in the semantic analysis phase.
+    //
     Token token = prev;
     int prec = get_expr_precedence() - (prev.type == TOK_ASSIGN ? 1 : 0);
     advance();
@@ -453,13 +460,13 @@ std::unique_ptr<ExprAST> Parser::binary(std::unique_ptr<ExprAST> e) {
 }
 
 std::unique_ptr<ExprAST> Parser::ternary(std::unique_ptr<ExprAST> e) {
-    /* NOTE:
-     * 1. @then_arm of conditional is parsed as if parenthesized. Precedence
-     *    of '?' is not used.
-     * 2. @else_arm of conditional must be another conditional. Here, prece-
-     *    dence of '?' is used. Since the ternary operator is right-associa-
-     *    tive, we pass in 1 less than the precedence of '?' here.
-     */
+    // NOTE:
+    // 1. @then_arm of conditional is parsed as if parenthesized. Precedence
+    //    of '?' is not used.
+    // 2. @else_arm of conditional must be another conditional. Here, prece-
+    //    dence of '?' is used. Since the ternary operator is right-associa-
+    //    tive, we pass in 1 less than the precedence of '?' here.
+    //
     advance();  // '?'
     auto then_expr = parse_expr(0);
     if (!then_expr) return NULL;
