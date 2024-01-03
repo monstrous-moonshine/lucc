@@ -228,10 +228,8 @@ std::unique_ptr<StmtAST> Parser::default_stmt() {
 }
 
 std::unique_ptr<StmtAST> Parser::block_stmt() {
-    std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> decls(
-            new std::vector<std::unique_ptr<DeclAST>>);
-    std::unique_ptr<std::vector<std::unique_ptr<StmtAST>>> stmts(
-            new std::vector<std::unique_ptr<StmtAST>>);
+    auto decls = std::make_unique<BlockStmtAST::DeclList>();
+    auto stmts = std::make_unique<BlockStmtAST::StmtList>();
     while (prev.type != TOK_RBRACE) {
         Token type = parse_type_spec();
         if (type.type == TOK_ERR) break;

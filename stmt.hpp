@@ -42,11 +42,15 @@ public:
 };
 
 class BlockStmtAST : public StmtAST {
-    std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> decls;
-    std::unique_ptr<std::vector<std::unique_ptr<StmtAST>>> stmts;
 public:
-    BlockStmtAST(std::unique_ptr<std::vector<std::unique_ptr<DeclAST>>> decls,
-                 std::unique_ptr<std::vector<std::unique_ptr<StmtAST>>> stmts)
+    using DeclList = std::vector<std::unique_ptr<DeclAST>>;
+    using StmtList = std::vector<std::unique_ptr<StmtAST>>;
+private:
+    std::unique_ptr<DeclList> decls;
+    std::unique_ptr<StmtList> stmts;
+public:
+    BlockStmtAST(std::unique_ptr<DeclList> decls,
+                 std::unique_ptr<StmtList> stmts)
         : decls(std::move(decls)), stmts(std::move(stmts)) {}
     void print(int level) override;
 };
