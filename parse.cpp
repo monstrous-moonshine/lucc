@@ -347,6 +347,7 @@ std::unique_ptr<StmtAST> Parser::return_stmt() {
         return std::make_unique<ReturnStmtAST>(nullptr);
     }
     auto e = parse_expr(0);
+    if (!e) return NULL;
     consume(TOK_SEMICOLON, "Expect ';'\n");
     return std::make_unique<ReturnStmtAST>(std::move(e));
 }
