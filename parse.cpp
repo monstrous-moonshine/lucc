@@ -189,16 +189,16 @@ std::unique_ptr<StmtAST> Parser::parse_stmt() {
 }
 
 std::unique_ptr<StmtAST> Parser::label_stmt() {
-    Token label = prev;
+    auto label = std::make_unique<std::string>(prev.lexeme);
     advance();
     if (match(TOK_COLON)) {
         auto stmt = parse_stmt();
         if (!stmt) return NULL;
         return std::make_unique<LabelStmtAST>(LabelStmtAST::LABEL,
-                std::move(label.lexeme), nullptr, std::move(stmt));
+                std::move(label), nullptr, std::move(stmt));
     } else {
         std::unique_ptr<ExprAST> e = std::make_unique<VarExprAST>(
-                std::move(label.lexeme));
+                std::move(label));
         while (0 < get_expr_precedence()) {
             auto infix_fn = get_expr_rule(prev.type)->infix;
             e = std::invoke(infix_fn, *this, std::move(e));
@@ -214,14 +214,14 @@ std::unique_ptr<StmtAST> Parser::case_stmt() {
     if (!e) return NULL;
     consume(TOK_COLON, "Expect ':'\n");
     auto stmt = parse_stmt();
-    return std::make_unique<LabelStmtAST>(LabelStmtAST::CASE, "",
+    return std::make_unique<LabelStmtAST>(LabelStmtAST::CASE, nullptr,
                                           std::move(e), std::move(stmt));
 }
 
 std::unique_ptr<StmtAST> Parser::default_stmt() {
     consume(TOK_COLON, "Expect ':'\n");
     auto stmt = parse_stmt();
-    return std::make_unique<LabelStmtAST>(LabelStmtAST::DEFAULT, "",
+    return std::make_unique<LabelStmtAST>(LabelStmtAST::DEFAULT, nullptr,
                                           nullptr, std::move(stmt));
 }
 
@@ -321,21 +321,20 @@ std::unique_ptr<StmtAST> Parser::do_stmt() {
 }
 
 std::unique_ptr<StmtAST> Parser::goto_stmt() {
-    Token label = prev;
+    auto label = std::make_unique<std::string>(prev.lexeme);
     advance();
     consume(TOK_SEMICOLON, "Expect ';'\n");
-    return std::make_unique<JumpStmtAST>(JumpStmtAST::GOTO,
-                                         std::move(label.lexeme));
+    return std::make_unique<JumpStmtAST>(JumpStmtAST::GOTO, std::move(label));
 }
 
 std::unique_ptr<StmtAST> Parser::continue_stmt() {
     consume(TOK_SEMICOLON, "Expect ';'\n");
-    return std::make_unique<JumpStmtAST>(JumpStmtAST::CONTINUE, "");
+    return std::make_unique<JumpStmtAST>(JumpStmtAST::CONTINUE, nullptr);
 }
 
 std::unique_ptr<StmtAST> Parser::break_stmt() {
     consume(TOK_SEMICOLON, "Expect ';'\n");
-    return std::make_unique<JumpStmtAST>(JumpStmtAST::BREAK, "");
+    return std::make_unique<JumpStmtAST>(JumpStmtAST::BREAK, nullptr);
 }
 
 std::unique_ptr<StmtAST> Parser::return_stmt() {
@@ -376,7 +375,7 @@ std::unique_ptr<ExprAST> Parser::parse_expr(int prec) {
 }
 
 std::unique_ptr<ExprAST> Parser::variable() {
-    auto name = prev.lexeme;
+    auto name = std::make_unique<std::string>(prev.lexeme);
     advance();
     return std::make_unique<VarExprAST>(std::move(name));
 }

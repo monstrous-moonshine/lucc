@@ -2,7 +2,7 @@
 #include <cstdio>
 
 void VarExprAST::print() {
-    printf("%s", &name[0]);
+    printf("%s", &(*name)[0]);
 }
 
 void NumberExprAST::print() {

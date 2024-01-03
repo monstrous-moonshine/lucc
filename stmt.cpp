@@ -14,7 +14,7 @@ void LabelStmtAST::print(int level) {
     indent(level - 2);
     switch (type) {
     case LABEL:
-        printf("%s:\n", &label[0]);
+        printf("%s:\n", &(*label)[0]);
         break;
     case CASE:
         printf("case ");
@@ -101,7 +101,7 @@ void JumpStmtAST::print(int level) {
     indent(level);
     switch (type) {
     case GOTO:
-        printf("goto %s;\n", &label[0]);
+        printf("goto %s;\n", &(*label)[0]);
         break;
     case CONTINUE:
         printf("continue;\n");

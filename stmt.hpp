@@ -22,14 +22,14 @@ public:
     };
 private:
     LabelType type;
-    std::string label;
+    std::unique_ptr<std::string> label;
     std::unique_ptr<ExprAST> case_exp;
     std::unique_ptr<StmtAST> stmt;
 public:
-    LabelStmtAST(LabelType type, std::string &&label,
+    LabelStmtAST(LabelType type, std::unique_ptr<std::string> label,
                  std::unique_ptr<ExprAST> case_exp,
                  std::unique_ptr<StmtAST> stmt)
-        : type(type), label(label)
+        : type(type), label(std::move(label))
         , case_exp(std::move(case_exp)), stmt(std::move(stmt)) {}
     void print(int level) override;
 };
@@ -123,10 +123,10 @@ public:
     };
 private:
     JumpType type;
-    std::string label;
+    std::unique_ptr<std::string> label;
 public:
-    JumpStmtAST(JumpType type, std::string &&label)
-        : type(type), label(label) {}
+    JumpStmtAST(JumpType type, std::unique_ptr<std::string> label)
+        : type(type), label(std::move(label)) {}
     void print(int level) override;
 };
 

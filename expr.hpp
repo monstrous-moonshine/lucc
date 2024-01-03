@@ -13,9 +13,9 @@ public:
 };
 
 class VarExprAST : public ExprAST {
-    std::string name;
+    std::unique_ptr<std::string> name;
 public:
-    VarExprAST(std::string &&name) : name(name) {}
+    VarExprAST(std::unique_ptr<std::string> name) : name(std::move(name)) {}
     void print() override;
 };
 
