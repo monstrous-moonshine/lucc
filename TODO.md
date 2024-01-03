@@ -3,6 +3,7 @@
 3. ~~Implement missing keywords or flag them, don't silently treat them
    as identifiers~~
 4. Add tests, lot more
+5. Do exec-charset conversion and string concatenation
 
 Unimplemented syntax:
 - Declaration
