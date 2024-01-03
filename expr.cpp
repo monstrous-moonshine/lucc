@@ -6,7 +6,7 @@ void VarExprAST::print() {
 }
 
 void NumberExprAST::print() {
-    printf("%.0lf", v);
+    printf("%ld", v);
 }
 
 void StringExprAST::print() {

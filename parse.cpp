@@ -382,7 +382,7 @@ std::unique_ptr<ExprAST> Parser::variable() {
 }
 
 std::unique_ptr<ExprAST> Parser::number() {
-    double v = std::stod(prev.lexeme);
+    long v = std::stol(prev.lexeme);
     advance();
     return std::make_unique<NumberExprAST>(v);
 }

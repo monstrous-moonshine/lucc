@@ -20,9 +20,9 @@ public:
 };
 
 class NumberExprAST : public ExprAST {
-    double v;
+    long v;
 public:
-    NumberExprAST(double v) : v(v) {}
+    NumberExprAST(long v) : v(v) {}
     void print() override;
 };
 
