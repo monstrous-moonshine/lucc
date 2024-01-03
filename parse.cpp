@@ -38,10 +38,8 @@ Token Parser::parse_type_spec() {
     }
 }
 
-std::unique_ptr<std::vector<std::unique_ptr<ExtDeclAST>>>
-Parser::parse_trans_unit() {
-    std::unique_ptr<std::vector<std::unique_ptr<ExtDeclAST>>> decls(
-            new std::vector<std::unique_ptr<ExtDeclAST>>);
+std::unique_ptr<Parser::ExtDeclList> Parser::parse_translation_unit() {
+    auto decls = std::make_unique<ExtDeclList>();
     while (prev.type != TOK_EOF) {
         auto decl = parse_external_decl();
         if (!decl) return NULL;

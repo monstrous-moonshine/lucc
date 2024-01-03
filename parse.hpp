@@ -15,7 +15,9 @@ class DirectDecl;
 class Parser {
 public:
     Parser(Scanner &scanner) : scanner(scanner) { advance(); }
-    std::unique_ptr<std::vector<std::unique_ptr<ExtDeclAST>>> parse_trans_unit();
+
+    using ExtDeclList = std::vector<std::unique_ptr<ExtDeclAST>>;
+    std::unique_ptr<ExtDeclList> parse_translation_unit();
 private:
     Scanner &scanner;
     Token prev;

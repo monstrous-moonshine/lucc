@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
         }
     }
 #endif
-    auto decls = parser.parse_trans_unit();
+    auto decls = parser.parse_translation_unit();
     if (decls) {
         for (auto &decl: *decls) {
             decl->print(0);
