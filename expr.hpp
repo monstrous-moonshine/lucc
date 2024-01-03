@@ -56,11 +56,12 @@ public:
 };
 
 class UnaryExprAST : public ExprAST {
+    bool postfix;
     Token token;
     std::unique_ptr<ExprAST> exp;
 public:
-    UnaryExprAST(Token token, std::unique_ptr<ExprAST> exp)
-        : token(token), exp(std::move(exp)) {}
+    UnaryExprAST(bool postfix, Token token, std::unique_ptr<ExprAST> exp)
+        : postfix(postfix), token(token), exp(std::move(exp)) {}
     void print() override;
 };
 
@@ -82,15 +83,6 @@ public:
                    std::unique_ptr<ExprAST> else_expr)
         : cond(std::move(cond)), then_expr(std::move(then_expr))
         , else_expr(std::move(else_expr)) {}
-    void print() override;
-};
-
-class PostfixExprAST : public ExprAST {
-    Token token;
-    std::unique_ptr<ExprAST> exp;
-public:
-    PostfixExprAST(Token token, std::unique_ptr<ExprAST> exp)
-        : token(token), exp(std::move(exp)) {}
     void print() override;
 };
 #endif

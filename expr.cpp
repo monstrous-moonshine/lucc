@@ -34,7 +34,9 @@ void CallExprAST::print() {
 }
 
 void UnaryExprAST::print() {
-    printf("(%s ", &token.lexeme[0]);
+    printf("(");
+    if (postfix) printf(">");
+    printf("%s ", &token.lexeme[0]);
     exp->print();
     printf(")");
 }
@@ -54,11 +56,5 @@ void TernaryExprAST::print() {
     then_expr->print();
     printf(" ");
     else_expr->print();
-    printf(")");
-}
-
-void PostfixExprAST::print() {
-    printf("(>%s ", &token.lexeme[0]);
-    exp->print();
     printf(")");
 }
